@@ -151,3 +151,57 @@
   .media{height:220px}
   .card .media{margin:-17px -17px 14px;border-radius:16px 16px 0 0;border-left:0;border-right:0;border-top:0}
 }
+
+/* 2026-10-06: 臭味互动层 */
+#flyLayer{position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden}
+.pixel-fly{position:absolute;width:16px;height:11px;display:block;opacity:.76;filter:drop-shadow(0 1px 1px #000)}
+.pixel-fly::before{content:"";position:absolute;left:6px;top:3px;width:5px;height:7px;background:#181b19;box-shadow:-5px 1px 0 #181b19,5px 1px 0 #181b19}
+.pixel-fly::after{content:"";position:absolute;left:1px;top:0;width:6px;height:4px;background:#87928c;box-shadow:8px 0 0 #87928c}
+.stink-layer{position:absolute;left:12px;right:12px;top:2px;bottom:34px;pointer-events:none;z-index:3;overflow:hidden;mix-blend-mode:screen}
+.stink-wisp{position:absolute;left:calc(8% + var(--i)*8%);bottom:6px;width:2px;height:16px;border-radius:999px;background:#8cff55;opacity:calc(.15 + var(--odor-power)*.055);filter:blur(.35px);animation:stink-rise 2.1s ease-in-out infinite;animation-delay:var(--delay);transform-origin:bottom}
+@keyframes stink-rise{0%{transform:translate3d(0,6px,0) scaleY(.72);opacity:.05}45%{opacity:.2}100%{transform:translate3d(var(--drift),-48px,0) scaleY(1.7) rotate(7deg);opacity:0}}
+.card.contamination-max{animation:contam-wobble 1.4s steps(2,end) infinite;box-shadow:0 0 0 1px rgba(208,255,66,.14),0 12px 32px rgba(123,255,74,.12),0 0 34px rgba(119,255,77,.06);filter:saturate(1.12)}
+@keyframes contam-wobble{0%,100%{transform:translate3d(0,0,0) rotate(0)}25%{transform:translate3d(-1px,0,0) rotate(-.3deg)}50%{transform:translate3d(1px,1px,0) rotate(.35deg)}75%{transform:translate3d(0,-1px,0) rotate(-.2deg)}}
+.max-odor-shake .detail{animation:page-shake .52s steps(2,end) 2}
+.gag-flash{animation:gag-flash .9s ease-out}
+@keyframes page-shake{0%{transform:translate(0)}20%{transform:translate(-2px,1px)}40%{transform:translate(2px,-1px)}60%{transform:translate(-1px,-2px)}80%{transform:translate(2px,1px)}100%{transform:translate(0)}}
+@keyframes gag-flash{0%,100%{filter:none}40%{filter:sepia(.28) saturate(1.4)}60%{filter:sepia(.15) saturate(1.2)}}
+.smell-hit .hero{animation:smell-hit .6s ease}
+@keyframes smell-hit{20%{filter:saturate(1.2) blur(.2px)}45%{transform:rotate(-.3deg)}70%{transform:rotate(.25deg)}}
+.museum-toast{position:fixed;left:50%;bottom:24px;z-index:10001;max-width:min(680px,calc(100vw - 30px));padding:12px 16px;border:1px solid #394820;border-radius:14px;background:rgba(14,18,12,.95);color:#e9f0e2;box-shadow:0 18px 42px rgba(0,0,0,.35);transform:translate(-50%,18px);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;text-align:center;font-size:13px}
+.museum-toast.show{opacity:1;transform:translate(-50%,0)}
+.museum-toast.bad{border-color:#553f26;background:rgba(28,20,13,.96)}
+.rank-badge{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:20px;padding:14px 16px;border:1px solid #343c2a;border-radius:16px;background:linear-gradient(135deg,rgba(17,24,13,.92),rgba(18,20,24,.92));box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.rank-badge>div:first-child{display:grid;gap:2px;min-width:0}
+.rank-kicker{font-size:10px;color:#91b869;letter-spacing:.13em}
+#rankName{font-size:19px;line-height:1.2;color:#eaffcc}
+#rankDesc,#viewProgress{font-size:11px;color:#7f8793}
+.rank-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.rank-actions .random{white-space:nowrap}
+.flush-overlay{position:fixed;inset:0;background:rgba(5,8,6,.82);backdrop-filter:blur(5px);z-index:10000;display:grid;place-items:center;text-align:center;align-content:center;gap:12px;animation:flush-in .16s ease-out}
+.flush-overlay strong{font-size:20px;color:#f0f4ec}
+.flush-overlay small{color:#798276}
+.toilet-wrap{position:relative;width:180px;height:160px;margin:auto}
+.toilet-lid{position:absolute;left:43px;top:16px;width:94px;height:22px;border-radius:22px 22px 10px 10px;background:#e9ebeb;border:5px solid #687078;transform-origin:center bottom;animation:lid-open .7s ease-out}
+.toilet-bowl{position:absolute;left:40px;top:56px;width:100px;height:70px;border-radius:0 0 38px 38px;background:#e9ebeb;border:5px solid #687078;display:grid;place-items:center;font-size:30px;animation:bowl-wobble .65s ease-in-out}
+.flush-swirl{position:absolute;left:63px;top:76px;width:54px;height:28px;border:4px solid #6c7c75;border-top-color:transparent;border-radius:50%;animation:swirl 1s linear infinite}
+.flush-overlay.done{animation:flush-out .25s ease-in forwards}
+.flush-overlay.done .toilet-wrap{animation:flush-zoom .25s ease-in forwards}
+@keyframes lid-open{0%{transform:rotate(0)}45%{transform:rotate(-24deg)}100%{transform:rotate(-18deg)}}
+@keyframes bowl-wobble{0%,100%{transform:translateX(0)}30%{transform:translateX(-3px)}60%{transform:translateX(3px)}}
+@keyframes swirl{to{transform:rotate(360deg) scale(.85)}}
+@keyframes flush-in{from{opacity:0}to{opacity:1}}
+@keyframes flush-out{to{opacity:0}}
+@keyframes flush-zoom{to{transform:scale(.86) rotate(3deg)}}
+.today-quote{border-color:#536b38!important;box-shadow:0 0 0 1px rgba(184,255,74,.08),0 12px 30px rgba(184,255,74,.08)}
+.today-quote::before{content:"TODAY'S STINK · 今日臭语录";display:block;margin-bottom:9px;color:#a8e66f;font-size:9px;letter-spacing:.13em;font-weight:800}
+#chaosNoticeExtra{display:inline}
+@media(max-width:600px){
+  .rank-badge{align-items:flex-start;flex-direction:column}
+  .rank-actions{width:100%;justify-content:stretch}
+  .rank-actions .random{width:100%}
+  .stink-layer{bottom:24px}
+}
+@media(prefers-reduced-motion:reduce){
+  .pixel-fly,.stink-wisp,.contamination-max,.max-odor-shake .detail,.gag-flash,.smell-hit .hero,.flush-overlay,.toilet-lid,.toilet-bowl,.flush-swirl{animation:none!important}
+}
