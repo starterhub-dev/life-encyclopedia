@@ -118,7 +118,7 @@ function odorInfo(x){
 }
 function odorHtml(x,detail=false){
   const o=odorInfo(x),dots="●".repeat(o.score)+"○".repeat(6-o.score);
-  if(detail)return '<section class="odor-meter"><div class="odor-meter-head"><span class="odor-title">'+o.emoji+" 臭度："+esc(o.name)+'</span><span class="odor-score">'+o.score+' / 6</span></div><div class="odor-bar" aria-label="臭度 '+o.score+' / 6"><div class="odor-fill" style="--odor-width:'+((o.score/6)*100)+'%"></div></div><div class="recent-note">本系统只用于馆内趣味分级，不代表事实判断或价值判断。</div></section>';
+  if(detail)return '<section class="odor-meter '+(o.score===6?"odor-meter--max":"")+'" data-odor-score="'+o.score+'" '+(o.score===6?"data-max-odor":"")+'><div class="odor-meter-head"><span class="odor-title">'+o.emoji+" 臭度计："+esc(o.name)+'</span><span class="odor-score">'+o.score+' / 6</span></div><div class="odor-dial" style="--odor-angle:'+(-66+(o.score/6)*132)+'deg"><div class="odor-arc"></div><div class="odor-needle"></div><div class="odor-hub">👃</div><div class="odor-ticks">Ⅰ Ⅱ Ⅲ Ⅳ Ⅴ Ⅵ</div></div><div class="recent-note">指针只是趣味计量器。满格时本馆会轻微震动，并触发“呕”音效。</div></section>';
   return '<span class="odor odor-'+o.score+'" title="臭度：'+esc(o.name)+'">'+o.emoji+' '+esc(o.name)+' <span class="odor-dots">'+dots+'</span></span>';
 }
 
@@ -265,7 +265,7 @@ function render(){
   const q=normalizeSearch(input.value);
   const list=getVisibleItems(q);
   renderSearchSummary(q,list);
-  grid.innerHTML=list.map(x=>{const i=items.indexOf(x),fav=isFavorite(x);return '<article class="card" data-i="'+i+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><button class="fav-card '+(fav?"on":"")+'" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div><h2>'+highlightText(x.t,q)+'</h2><div class="quote">“'+highlightText(x.q,q)+'”</div>'+odorHtml(x)+'<div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}).join("");
+  grid.innerHTML=list.map(x=>{const i=items.indexOf(x),fav=isFavorite(x);return '<article class="card" data-i="'+i+'" data-odor="'+odorInfo(x).score+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><button class="fav-card '+(fav?"on":"")+'" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div><h2>'+highlightText(x.t,q)+'</h2><div class="quote">“'+highlightText(x.q,q)+'”</div>'+odorHtml(x)+'<div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}).join("");
   const empty=document.querySelector("#empty");empty.classList.toggle("hidden",list.length>0);empty.innerHTML=renderEmptyState(q,list);empty.querySelectorAll("[data-suggest-i]").forEach(b=>b.onclick=e=>{e.stopPropagation();detail(items[Number(b.dataset.suggestI)])});document.querySelector("#totalCount").textContent=items.length;document.querySelector("#categoryCount").textContent=cats.length-1;const collectionCount=document.querySelector("#collectionCount");if(collectionCount)collectionCount.textContent=items.filter(x=>odorInfo(x).score===6).length;
   grid.querySelectorAll(".card").forEach(el=>el.onclick=()=>detail(items[Number(el.dataset.i)]));
   grid.querySelectorAll(".fav-card").forEach(b=>b.onclick=e=>{e.stopPropagation();const x=items[Number(b.dataset.fav)],on=setFavorite(x,!isFavorite(x));b.classList.toggle("on",on);b.textContent=on?"★":"☆"});
