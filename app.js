@@ -240,7 +240,7 @@ function looseSearchScore(x,q){
 }
 function renderEmptyState(q,list){
   if(list.length)return "";
-  if(!q)return '<div class="empty-results"><div class="empty-title">🗿 当前筛选下没有展品</div><div class="empty-tip">换个臭度、分类或排序条件试试。</div></div>';
+  if(!q)return '<div class="empty-results"><div class="empty-title">🚽 这坨已被馆长冲走了</div><div class="empty-tip">当前筛选下没有展品，换个臭度、分类或关键词，再从下水道捞一坨。</div></div>';
   const candidates=items.map((x,i)=>({x,i,score:looseSearchScore(x,q)}))
     .filter(v=>v.score>0)
     .sort((a,b)=>b.score-a.score||a.i-b.i)
@@ -248,7 +248,7 @@ function renderEmptyState(q,list){
   const suggestions=candidates.length
     ? '<div class="empty-suggestions">'+candidates.map(v=>'<button class="empty-suggestion" data-suggest-i="'+v.i+'"><span>💩</span><span><strong>'+esc(v.x.t)+'</strong><small>'+esc(v.x.c)+' · '+esc(odorInfo(v.x).name)+'</small></span><span>查看 →</span></button>').join("")+'</div>'
     : '<div class="empty-tip">试试删掉一个关键词，或者换个更具体的词。</div>';
-  return '<div class="empty-results"><div class="empty-title">🔎 暂无匹配</div><div class="empty-tip">没有找到完全符合的馆藏，下面给你捞几坨可能相关的：</div>'+suggestions+'</div>';
+  return '<div class="empty-results"><div class="empty-title">🚽 这坨已被馆长冲走了</div><div class="empty-tip">这个关键词暂时没捞到原住民，下面给你从垃圾堆捞几坨可能相关的：</div>'+suggestions+'</div>';
 }
 
 function getVisibleItems(q){
