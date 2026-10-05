@@ -63,3 +63,53 @@
   .detail-actions{padding-right:0}
   .detail-action{min-height:40px}
 }
+
+/* 2026-10 cyber shit museum polish */
+.hero{position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 82% 22%,rgba(255,151,66,.12),transparent 26%),linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.28))}
+.hero .wrap{position:relative;z-index:1}
+.hero-art{float:right;width:min(47%,560px);margin:10px 0 14px 34px;border:1px solid #393f49;border-radius:20px;overflow:hidden;background:#0b0d11;box-shadow:0 18px 45px rgba(0,0,0,.28)}
+.hero-art img{display:block;width:100%;height:auto}
+.hero-art figcaption{padding:8px 11px;color:#737b87;background:#111318;border-top:1px solid #242933;font-size:11px}
+.hero .stats{clear:both}
+.chaos-gallery{margin:24px auto 10px}
+.chaos-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;padding:18px 0 14px}
+.chaos-head h2{margin:5px 0 4px;font-size:28px;line-height:1.2}
+.chaos-head p{margin:0;color:var(--muted);max-width:700px}
+.chaos-badge{padding:7px 10px;border:1px solid #3a2e22;border-radius:999px;background:#1c1711;color:#c8a276;font-size:11px;white-space:nowrap}
+.chaos-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.chaos-grid article{padding:15px 16px;border:1px solid #2c3038;border-radius:15px;background:linear-gradient(145deg,#17191f,#111318);min-width:0;transition:transform .18s,border-color .18s}
+.chaos-grid article:hover{transform:translateY(-2px);border-color:#4c515c}
+.chaos-grid b,.chaos-grid span{display:block}
+.chaos-grid b{font-size:15px;line-height:1.45;color:#eceff3}
+.chaos-grid span{margin-top:6px;color:#737b87;font-size:11px}
+.bgm-panel{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 22px;padding:15px 16px;border:1px solid #3b2d20;border-radius:16px;background:linear-gradient(135deg,#18130f,#121419)}
+.bgm-copy{display:grid;gap:3px;min-width:0}
+.bgm-kicker{font-size:10px;letter-spacing:.14em;color:#c48a52;font-weight:800}
+.bgm-copy strong{font-size:15px;color:#f2e7d8}
+#bgmStatus{font-size:11px;color:#7f8793;overflow-wrap:anywhere}
+.bgm-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bgm-controls .random{border-color:#4f3724;background:#24180f;color:#f5e6d4}
+.volume-control{display:flex;align-items:center;gap:7px;color:#7f8793;font-size:11px}
+.volume-control input{width:125px;accent-color:#c27a34}
+.grid .card{content-visibility:auto;contain-intrinsic-size:420px}
+.media img{background:#101217}
+@media(max-width:900px){
+  .hero-art{float:none;width:100%;margin:22px 0 0}
+  .chaos-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:600px){
+  .hero-art{border-radius:16px}
+  .chaos-head{padding-top:8px}
+  .chaos-head h2{font-size:24px}
+  .chaos-grid{grid-template-columns:1fr;gap:8px}
+  .chaos-grid article{padding:13px 14px}
+  .bgm-panel{align-items:stretch}
+  .bgm-controls{width:100%;justify-content:stretch}
+  .bgm-controls .random{width:100%}
+  .volume-control{width:100%;justify-content:space-between}
+  .volume-control input{flex:1;width:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  .chaos-grid article{transition:none}
+}
