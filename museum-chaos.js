@@ -122,7 +122,7 @@
     if(name)name.textContent=t.name;if(desc)desc.textContent=t.desc;if(prog)prog.textContent=t.next?"还差 "+Math.max(0,t.next-n)+" 件解锁下一称号":"称号已达最高级";
   }
   ensureBadge();
-  if(grid)grid.addEventListener("click",e=>{const card=e.target.closest?.(".card");if(card)markViewed(Number(card.dataset.i))});
+  if(grid)grid.addEventListener("click",e=>{const card=e.target.closest?.(".card");if(card&&!e.target.closest(".fav-card"))markViewed(Number(card.dataset.i))});
 
   function makeCertificate(){
     const n=getJSON(STORE.views,[]).length,t=currentTitle(n),c=document.createElement("canvas"),W=1200,H=840,ctx=c.getContext("2d");
@@ -132,9 +132,24 @@
     ctx.fillStyle="#b8ff4a";ctx.font="900 64px system-ui";ctx.fillText(t.name,80,370);ctx.fillStyle="#9ea6b2";ctx.font="400 28px system-ui";ctx.fillText("已浏览不同展品："+n+" 件",80,440);
     ctx.fillStyle="#fff";ctx.font="600 24px system-ui";ctx.fillText("互联网臭狗屎博物馆 · 馆长办公室",80,520);ctx.fillStyle="#7f8793";ctx.font="400 20px system-ui";ctx.fillText(new Date().toLocaleDateString("zh-CN"),80,578);
     const url=c.toDataURL("image/png");
-    if(navigator.share){
-      c.toBlob(blob=>{try{navigator.share({title:"互联网臭学家证书",text:"我在互联网臭狗屎博物馆拿到了「"+t.name+"」称号。",files:blob?[new File([blob],"臭学家证书.png",{type:"image/png"})]:[]}).catch(()=>openCert(url,t))}catch(e){openCert(url,t)}});
-    }else openCert(url,t);
+    showCertificate(url,t,n);
+  }
+  function showCertificate(url,t,n){
+    const old=$("#certificateModal");if(old)old.remove();
+    const box=document.createElement("div");box.id="certificateModal";box.className="certificate-modal";
+    box.innerHTML='<div class="certificate-card"><button class="certificate-close" type="button">×</button><div class="certificate-kicker">INTERNET TRASH ARCHIVE</div><img src="'+url+'" alt="互联网臭学家证书"><div class="certificate-actions"><button id="shareCertificate" class="random" type="button">📤 分享证书</button><a class="random certificate-save" href="'+url+'" download="互联网臭学家证书.png">💾 保存图片</a></div><small>长按图片也可以保存或转发。已浏览 '+n+' 件展品。</small></div></div>';
+    document.body.appendChild(box);
+    $(".certificate-close",box).onclick=()=>box.remove();
+    box.addEventListener("click",e=>{if(e.target===box)box.remove()});
+    $("#shareCertificate",box).onclick=async()=>{
+      try{
+        const res=await fetch(url),blob=await res.blob(),file=new File([blob],"互联网臭学家证书.png",{type:"image/png"});
+        if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:"互联网臭学家证书",text:"我在互联网臭狗屎博物馆拿到了「"+t.name+"」称号。",files:[file]});}
+        else if(navigator.share){await navigator.share({title:"互联网臭学家证书",text:"我在互联网臭狗屎博物馆拿到了「"+t.name+"」称号。",url:location.href});}
+        else toast("当前浏览器没有原生分享，点“保存图片”再发群。","good");
+      }catch(e){if(e?.name!=="AbortError")toast("分享失败，可以直接点“保存图片”。","bad")}
+    };
+  }
   }
   function openCert(url,t){
     const w=window.open("");if(!w){toast("浏览器拦截了证书窗口，请允许弹窗。","bad");return}
@@ -160,7 +175,7 @@
   }
 
   function dailyQuote(){
-    const articles=$$(".chaos-grid article");if(!articles.length)return;const day=Math.floor(Date.now()/86400000),idx=day%articles.length;
+    const articles=$$(".chaos-grid article");if(!articles.length)return;const d=new Date();d.setHours(0,0,0,0);const day=Math.floor(d.getTime()/86400000),idx=day%articles.length;
     articles.forEach((a,i)=>a.classList.toggle("today-quote",i===idx));
     const head=$(".chaos-head p");if(head)head.textContent="今日臭语录 · "+(articles[idx]?.querySelector("b")?.textContent||"馆藏污染")+" · 每天自动轮换，明天再臭一条。";
   }
