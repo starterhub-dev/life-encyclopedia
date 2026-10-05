@@ -113,3 +113,41 @@
 @media(prefers-reduced-motion:reduce){
   .chaos-grid article{transition:none}
 }
+
+/* 2026-10 visual pass: desktop首屏 + 全馆藏图片兜底 */
+.hero{padding:48px 0 30px}
+.hero-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(360px,.85fr);align-items:center;gap:34px}
+.hero-copy{min-width:0}
+.hero-copy h1{max-width:780px}
+.hero-copy p{max-width:700px;margin-bottom:0}
+.hero-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.hero-chips span{padding:6px 9px;border:1px solid #2b3038;border-radius:999px;background:#111419;color:#89919d;font-size:11px}
+.hero-art{float:none;width:100%;margin:0;align-self:stretch;display:flex;flex-direction:column;justify-content:center}
+.hero-art img{aspect-ratio:1200/760;object-fit:cover}
+.grid{align-items:start}
+.media{height:210px;position:relative}
+.media-link{display:block;height:100%;position:relative}
+.media img{width:100%;height:100%;object-fit:cover}
+.media-placeholder{min-height:100%}
+.media-credit{position:absolute;left:0;right:0;bottom:0;z-index:2;background:linear-gradient(180deg,transparent,#0b0d11);padding:18px 10px 7px}
+.museum-fallback img{object-fit:cover}
+.card{display:flex;flex-direction:column}
+.card .media{order:-1}
+.card .meta{margin-top:auto;padding-top:12px}
+@media(max-width:900px){
+  .hero-layout{grid-template-columns:1fr;gap:22px}
+  .hero-art{order:2}
+  .hero{padding:42px 0 28px}
+}
+@media(min-width:901px){
+  .hero .stats{margin-top:22px}
+  .hero-foot{margin-bottom:2px}
+  .chaos-gallery{margin-top:30px}
+}
+@media(max-width:600px){
+  .hero{padding-top:34px}
+  .hero-chips{margin-top:14px}
+  .hero-chips span{font-size:10px;padding:5px 8px}
+  .media{height:220px}
+  .card .media{margin:-17px -17px 14px;border-radius:16px 16px 0 0;border-left:0;border-right:0;border-top:0}
+}
