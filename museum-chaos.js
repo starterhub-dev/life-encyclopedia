@@ -92,6 +92,8 @@
     if(max&&!max.dataset.gagged){max.dataset.gagged="1";document.body.classList.add("gag-flash");setTimeout(()=>document.body.classList.remove("gag-flash"),900);playGag()}
   }
   new MutationObserver(checkMaxOdor).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:["data-max-odor"]});checkMaxOdor();
+  const detailDialog=$("#detailDialog");
+  if(detailDialog)detailDialog.addEventListener("close",()=>document.body.classList.remove("max-odor-shake"));
 
   const toolbar=$(".toolbar");
   if(toolbar&&!$("#sniffBtn")){
