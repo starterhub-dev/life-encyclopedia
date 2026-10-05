@@ -205,3 +205,35 @@
 @media(prefers-reduced-motion:reduce){
   .pixel-fly,.stink-wisp,.contamination-max,.max-odor-shake .detail,.gag-flash,.smell-hit .hero,.flush-overlay,.toilet-lid,.toilet-bowl,.flush-swirl{animation:none!important}
 }
+
+/* 臭度计：半圆仪表盘 */
+.odor-dial{position:relative;width:min(100%,440px);height:142px;margin:8px auto 0;overflow:hidden}
+.odor-arc{position:absolute;left:50%;bottom:8px;width:260px;height:130px;transform:translateX(-50%);border:10px solid #30353d;border-bottom:0;border-radius:260px 260px 0 0;background:linear-gradient(90deg,transparent 0 8%,rgba(184,255,74,.2) 18%,rgba(255,210,92,.22) 50%,rgba(255,120,132,.26) 82%,rgba(231,140,255,.25) 92%);filter:drop-shadow(0 0 8px rgba(184,255,74,.05))}
+.odor-arc:after{content:"";position:absolute;left:6px;right:6px;top:6px;height:90px;border-top:2px dashed #59606a;border-radius:260px 260px 0 0;opacity:.42}
+.odor-needle{position:absolute;left:50%;bottom:13px;width:112px;height:4px;border-radius:999px;background:#f3f4f6;transform-origin:0 50%;transform:rotate(var(--odor-angle));box-shadow:0 0 9px rgba(255,255,255,.35);animation:needle-wobble 1s ease-in-out infinite alternate}
+.odor-meter--max .odor-needle{background:#e78cff;box-shadow:0 0 15px rgba(231,140,255,.55);animation:needle-wobble-max .14s steps(2,end) infinite}
+.odor-hub{position:absolute;left:50%;bottom:0;width:34px;height:34px;margin-left:-17px;border:1px solid #48505b;border-radius:50%;display:grid;place-items:center;background:#15181d;font-size:17px;box-shadow:0 7px 18px rgba(0,0,0,.28)}
+.odor-ticks{position:absolute;left:50%;bottom:43px;transform:translateX(-50%);width:250px;display:flex;justify-content:space-between;color:#717985;font:700 10px ui-monospace,Consolas,monospace;letter-spacing:.02em}
+@keyframes needle-wobble{from{transform:rotate(calc(var(--odor-angle) - 2deg))}to{transform:rotate(calc(var(--odor-angle) + 2deg))}}
+@keyframes needle-wobble-max{0%,100%{transform:rotate(calc(var(--odor-angle) - 7deg))}50%{transform:rotate(calc(var(--odor-angle) + 7deg))}}
+.max-odor-shake{animation:body-shake .52s steps(2,end) 2}
+@keyframes body-shake{0%,100%{transform:translate3d(0,0,0)}20%{transform:translate3d(-2px,1px,0)}40%{transform:translate3d(2px,-1px,0)}60%{transform:translate3d(-1px,-2px,0)}80%{transform:translate3d(2px,1px,0)}}
+.certificate-modal{position:fixed;inset:0;z-index:10002;display:grid;place-items:center;padding:18px;background:rgba(3,5,4,.86);backdrop-filter:blur(8px)}
+.certificate-card{position:relative;width:min(720px,96vw);max-height:94vh;overflow:auto;padding:16px;border:1px solid #475335;border-radius:18px;background:#101512;box-shadow:0 26px 70px rgba(0,0,0,.48);text-align:center}
+.certificate-card img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid #2e3827}
+.certificate-kicker{margin:2px 0 10px;color:#9fca78;font-size:10px;letter-spacing:.16em;font-weight:800}
+.certificate-close{position:absolute;right:22px;top:22px;width:38px;height:38px;border:1px solid #4a5350;border-radius:11px;background:rgba(13,17,15,.92);color:#fff;font-size:27px;line-height:1;cursor:pointer;z-index:2}
+.certificate-actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+.certificate-actions .random{min-width:140px;text-decoration:none;text-align:center}
+.certificate-card small{display:block;margin-top:10px;color:#788179;font-size:11px}
+@media(max-width:600px){
+  .odor-dial{height:132px}
+  .odor-arc{width:230px;height:114px}
+  .odor-ticks{width:220px}
+  .certificate-modal{padding:10px}
+  .certificate-card{padding:11px}
+  .certificate-close{right:16px;top:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .odor-needle,.odor-meter--max .odor-needle,.max-odor-shake{animation:none!important}
+}
