@@ -24,17 +24,23 @@ function imageQueryVariants(x){
 function scoreCandidate(page,variant,x){
   const title=normalizeSearch(page.title||"").toLowerCase();
   const desc=normalizeSearch(page.description||"").toLowerCase();
+  const cats=normalizeSearch((page.categories||[]).map(v=>typeof v==="string"?v:(v.title||"")).join(" ")).toLowerCase();
   const v=normalizeSearch(variant).toLowerCase();
-  const words=v.split(" ").filter(w=>w.length>=3&&!["the","and","for","you","are","this","that","with","from","meme","internet","image","images"].includes(w));
+  const words=v.split(" ").filter(w=>w.length>=3&&!["the","and","for","you","are","this","that","with","from","meme","internet","image","images","photo","picture"].includes(w));
   let score=0;
-  if(v&&title.includes(v))score+=30;
-  for(const w of words){if(title.includes(w))score+=6;if(desc.includes(w))score+=1}
-  if(/meme|reaction|gif|jpg|png/.test(title))score+=1;
+  if(v&&title===v)score+=80;
+  else if(v&&title.includes(v))score+=45;
+  for(const w of words){
+    if(title.includes(w))score+=9;
+    if(desc.includes(w))score+=2;
+    if(cats.includes(w))score+=2;
+  }
+  if(/meme|reaction|gif|jpg|jpeg|png|webp/.test(title))score+=2;
   if(/真实蠢贼|蠢贼新闻/.test(x.t))score-=20;
   return score;
 }
 async function commonsSearch(variant,x){
-  const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(variant)+"&gsrnamespace=6&gsrlimit=6&prop=imageinfo|categories&iiprop=url|mime|size|thumburl|extmetadata&iiurlwidth=900&format=json&origin=*";
+  const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(variant)+"&gsrnamespace=6&gsrlimit=12&prop=imageinfo|categories&iiprop=url|mime|size|thumburl|extmetadata&iiurlwidth=900&format=json&origin=*";
   const r=await fetch(url,{headers:{Accept:"application/json"}});
   if(!r.ok)throw new Error("HTTP "+r.status);
   const j=await r.json();
@@ -42,9 +48,11 @@ async function commonsSearch(variant,x){
   pages.sort((a,b)=>scoreCandidate(b,variant,x)-scoreCandidate(a,variant,x));
   const p=pages[0],info=p&&p.imageinfo&&p.imageinfo[0];
   if(!p||!info||!info.url)return null;
+  const score=scoreCandidate(p,variant,x);
+  if(score<12)return null;
   const meta=info.extmetadata||{};
   const license=(meta.LicenseShortName&&meta.LicenseShortName.value)||"许可证见文件页";
-  return {thumb:info.thumburl||info.url,original:info.url,page:"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent((p.title||"").replace(/^File:/,"")).replace(/%2F/g,"/"),title:(p.title||"").replace(/^File:/,""),license,artist:(meta.Artist&&meta.Artist.value)||"",query:variant};
+  return {thumb:info.thumburl||info.url,original:info.url,page:"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent((p.title||"").replace(/^File:/,"")).replace(/%2F/g,"/"),title:(p.title||"").replace(/^File:/,""),license,artist:(meta.Artist&&meta.Artist.value)||"",query:variant,confidence:score};
 }
 async function commonsImage(x){
   const key=x.t+"|"+x.q;if(imageCache.has(key))return imageCache.get(key);if(imagePending.has(key))return imagePending.get(key);
@@ -57,16 +65,23 @@ async function commonsImage(x){
     }
     ranked.sort((a,b)=>b.score-a.score);
     const best=ranked[0];
-    if(best&&best.score>1){imageCache.set(key,best.data);return best.data}
+    if(best&&best.score>=12){imageCache.set(key,best.data);return best.data}
     imageCache.set(key,null);return null;
   }catch(e){imageCache.set(key,null);return null}finally{imagePending.delete(key)}})();
   imagePending.set(key,promise);return promise;
 }
 function mediaHtml(i,kind){const k=kind||"card";const box=k==="detail"?"detail-media":"media";return '<div class="'+box+' media-loading" data-media="'+i+'"><div class="media-placeholder">🖼️ 图片考古中…</div></div>'}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function fallbackSvg(x){
+  const title=esc(x.t).slice(0,48),quote=esc(x.q).slice(0,82),cat=esc(x.c);
+  const palettes={"极臭":["#ff7a45","#2b1510"],"恶臭":["#d6a34a","#241c0f"],"逆天发言":["#6fe6ff","#10252b"],"政治抽象":["#c79cff","#20162b"],"黑色幽默":["#d9d9d9","#1c1c1c"],"简中互联网":["#b9ef6d","#182414"],"全球互联网":["#73c8ff","#11202a"],"历史地狱笑话":["#e6c16d","#282014"],"互联网党争与蠢贼":["#ff9b9b","#281417"]};
+  const p=palettes[x.c]||["#b8ff4a","#172014"];
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="'+p[1]+'"/><stop offset="1" stop-color="#0d1015"/></linearGradient></defs><rect width="900" height="520" fill="url(#g)"/><circle cx="760" cy="92" r="58" fill="'+p[0]+'" opacity=".12"/><path d="M420 155c-58 0-86 42-76 82-28 6-48 30-48 58 0 37 31 66 70 66h140c39 0 70-29 70-66 0-28-20-52-48-58 10-40-18-82-76-82-8-24-23-36-46-36-23 0-38 12-46 36z" fill="#8d4f2e" stroke="'+p[0]+'" stroke-width="6"/><path d="M374 229h42M484 229h42" stroke="#17100d" stroke-width="12" stroke-linecap="round"/><path d="M425 264q25 20 50 0" fill="none" stroke="#17100d" stroke-width="8" stroke-linecap="round"/><text x="48" y="62" fill="'+p[0]+'" font-family="system-ui,sans-serif" font-size="18" font-weight="800" letter-spacing="3">MUSEUM RECONSTRUCTION</text><text x="48" y="108" fill="#f4f6f8" font-family="system-ui,sans-serif" font-size="30" font-weight="800">'+title.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</text><text x="48" y="450" fill="#aeb6c2" font-family="system-ui,sans-serif" font-size="18">'+quote.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</text><text x="48" y="482" fill="#68717e" font-family="system-ui,sans-serif" font-size="14">'+cat.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+' · 无可靠原始图片时的馆藏复原图</text></svg>';
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+}
 async function fillMedia(el,x){if(!el||el.dataset.loaded)return;const data=await commonsImage(x);if(!el.isConnected)return;el.dataset.loaded="1";el.classList.remove("media-loading");
-  if(!data){el.innerHTML='<div class="media-placeholder no-image">🗿 图片考古结果：驴头不对马嘴，暂不自动配图<br><a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener">手动去 Commons 找原图 ↗</a></div>';return}
-  el.innerHTML='<a class="media-link" href="'+data.original+'" target="_blank" rel="noopener"><img loading="lazy" src="'+data.thumb+'" alt="'+esc(x.t)+'"></a><div class="media-credit">Wikimedia Commons · '+esc(data.license)+'</div>'}
+  if(!data){const src=fallbackSvg(x);el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 馆藏复原图 · 暂无足够可信的原始图片匹配 · 点击可继续考古</div>';return}
+  el.innerHTML='<a class="media-link" href="'+data.original+'" target="_blank" rel="noopener"><img loading="lazy" src="'+data.thumb+'" alt="'+esc(x.t)+'"></a><div class="media-credit">🟢 原图匹配 · Wikimedia Commons · '+esc(data.license)+'</div>'}
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
   const io=new IntersectionObserver(entries=>{entries.filter(e=>e.isIntersecting).forEach(e=>{const el=e.target;io.unobserve(el);fillMedia(el,items[Number(el.dataset.media)])})},{rootMargin:"700px"});els.forEach(el=>io.observe(el))}
 const FAVORITES_KEY="internet-trash-favorites";
