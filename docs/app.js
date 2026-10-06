@@ -2,8 +2,16 @@ const items=[{"c":"逆天发言","l":"逆天","t":"我不会电脑","q":"I AM NO
 ;
 
 
+const ODOR_LEVELS={1:{level:"Lv.1",name:"轻度污染",icon:"🟢",color:"#10b981",bg:"rgba(16,185,129,.1)",desc:"尚在可控范围，建议保持观望。"},2:{level:"Lv.2",name:"有点臭",icon:"🟡",color:"#f59e0b",bg:"rgba(245,158,11,.1)",desc:"开始发酵，注意心理防护。"},3:{level:"Lv.3",name:"恶臭",icon:"🟠",color:"#f97316",bg:"rgba(249,115,22,.1)",desc:"刺鼻难耐，建议保持安全距离。"},4:{level:"Lv.4",name:"极臭",icon:"🔴",color:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"破防警告，脑干受到直接冲击！"},5:{level:"Lv.5",name:"逆天",icon:"🟣",color:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"逻辑崩塌，人类文明面临挑战！"},6:{level:"Lv.6",name:"馆藏级污染",icon:"🗿",color:"#8b5cf6",bg:"rgba(139,92,246,.2)",desc:"⚠️ 不建议徒手接触！馆长亲自戴手套封存 💩🧤",hazard:true}};
+const ODOR_OVERRIDES=new Set(["My name is cow","老八：奥利给，干了！","老八胃大","只因你太美"]);
+function odorScore(x){const l=String(x.l||"");if(l==="馆藏级污染"||x.hazard)return 6;if(ODOR_OVERRIDES.has(x.t))return 6;if(l==="逆天"||l.includes("蠢贼"))return 5;if(l==="极臭"||x.c==="极臭")return 4;if(l==="恶臭"||x.c==="恶臭")return 3;if(l==="抽象")return 2;return 1}
+function odorInfo(x){return ODOR_LEVELS[odorScore(x)]}
+function odorBadge(x){const o=odorInfo(x);return '<span class="odor-badge odor-lv-'+odorScore(x)+(o.hazard?" hazard":"")+'">'+o.icon+" "+o.level+" "+o.name+'</span>'}
+function odorFilterOptions(){return '<label class="odor-control"><span>💩 臭度鉴定</span><select id="odorSelect"><option value="0">全部臭度</option>'+Object.entries(ODOR_LEVELS).map(([k,v])=>'<option value="'+k+'">'+v.icon+" "+v.level+" "+v.name+'</option>').join("")+'</select></label><label class="odor-control"><span>↕️ 排序</span><select id="sortSelect"><option value="default">馆藏顺序</option><option value="odor-desc">臭度从高到低</option><option value="odor-asc">臭度从低到高</option><option value="title">展品名称</option></select></label>'}
+function showToast(msg,hazard=false){const old=document.querySelector(".odor-toast");if(old)old.remove();const el=document.createElement("div");el.className="odor-toast"+(hazard?" hazard":"");el.textContent=msg;document.body.appendChild(el);requestAnimationFrame(()=>el.classList.add("show"));setTimeout(()=>{el.classList.remove("show");setTimeout(()=>el.remove(),220)},3200)}
+function certificateHtml(x,id){const o=odorInfo(x);return '<section class="odor-certificate '+(o.hazard?"hazard":"")+'"><div class="certificate-kicker">🏛️ 互联网臭狗屎博物馆 · 馆藏鉴定证书</div><div class="certificate-id">编号：ITM-'+new Date().toISOString().slice(0,7).replace("-","")+"-"+id.replace(/^it-/,"")+'</div><div class="certificate-grade" style="--odor-color:'+o.color+';--odor-bg:'+o.bg+'"><span>'+o.icon+" "+o.level+'</span><strong>'+o.name+'</strong></div><dl><div><dt>展品名称</dt><dd>'+esc(x.t)+'</dd></div><div><dt>鉴定意见</dt><dd>'+esc(o.desc)+'</dd></div></dl>'+(o.hazard?'<div class="seal">⚠️ 高危馆藏 · 💩🧤 馆长亲自封存</div>':'<div class="seal">馆藏评级：'+o.icon+" "+o.name+'</div>')+'</section>'}
 const cats=["全部","极臭","恶臭","逆天发言","政治抽象","黑色幽默","简中互联网","全球互联网","历史地狱笑话"];
-let active="全部";
+let active="全部";let odorFilter=0;let sortMode="default";
 const grid=document.querySelector("#grid"),input=document.querySelector("#searchInput"),nav=document.querySelector("#categories");
 
 function cls(c){return c==="极臭"?"extreme":c==="恶臭"?"stinky":c==="政治抽象"?"politics":c==="黑色幽默"?"black":c==="简中互联网"?"cn":c==="全球互联网"?"global":c==="历史地狱笑话"?"history":c==="互联网党争与蠢贼"?"war":"absurd"}
@@ -69,22 +77,21 @@ function isFavorite(x){return getFavorites().includes(itemId(x))}
 function setFavorite(x,on){const a=getFavorites(),id=itemId(x),next=on?[...new Set([...a,id])]:a.filter(v=>v!==id);localStorage.setItem(FAVORITES_KEY,JSON.stringify(next));updateFavoriteCount();return on}
 function updateFavoriteCount(){const n=getFavorites().length;const el=document.querySelector("#favoriteCount");if(el)el.textContent=n}
 function updateUrl(x){const url=new URL(location.href);url.searchParams.set("id",itemId(x));history.replaceState({id:itemId(x)},"",url)}
-function shareItem(x){const url=new URL(location.href);url.searchParams.set("id",itemId(x));const text="💩 "+x.t+"\n"+x.q+"\n互联网臭狗屎博物馆";if(navigator.share){navigator.share({title:"互联网臭狗屎博物馆 · "+x.t,text,url:url.toString()}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(url.toString()).then(()=>{const b=document.querySelector("#shareBtn");if(b){const old=b.textContent;b.textContent="✅ 链接已复制";setTimeout(()=>b.textContent=old,1400)}})}else{prompt("复制这条展品链接：",url.toString())}}
+function shareItem(x){const url=new URL(location.href);url.searchParams.set("id",itemId(x));const o=odorInfo(x);const text="💩【互联网臭狗屎博物馆·馆藏鉴定】\n展品：《"+x.t+"》\n臭度评级："+o.icon+" "+o.level+" "+o.name+(o.hazard?"（馆长亲自封存）":"")+"\n鉴定意见："+o.desc+"\n🔗 "+url.toString();if(navigator.share){navigator.share({title:"互联网臭狗屎博物馆 · "+x.t,text,url:url.toString()}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast("📋 鉴定证书分享文案已复制"))}else{prompt("复制馆藏鉴定文案：",text)}}
 function openById(){const id=new URLSearchParams(location.search).get("id");if(!id)return;const x=items.find(v=>itemId(v)===id);if(x)detail(x,false)}
 
 function render(){
-  const q=input.value.trim().toLowerCase();const list=items.filter(x=>(active==="全部"||x.c===active)&&(!q||(x.t+x.q+x.s+x.c+x.n).toLowerCase().includes(q)));
-  grid.innerHTML=list.map(x=>{const i=items.indexOf(x),fav=isFavorite(x);return '<article class="card" data-i="'+i+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><button class="fav-card '+(fav?"on":"")+'" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div><h2>'+esc(x.t)+'</h2><div class="quote">“'+esc(x.q)+'”</div><div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}).join("");
-  document.querySelector("#empty").classList.toggle("hidden",list.length>0);document.querySelector("#totalCount").textContent=items.length;document.querySelector("#categoryCount").textContent=cats.length-1;
-  grid.querySelectorAll(".card").forEach(el=>el.onclick=()=>detail(items[Number(el.dataset.i)]));
-  grid.querySelectorAll(".fav-card").forEach(b=>b.onclick=e=>{e.stopPropagation();const x=items[Number(b.dataset.fav)],on=setFavorite(x,!isFavorite(x));b.classList.toggle("on",on);b.textContent=on?"★":"☆"});
-  updateFavoriteCount();observeMedia();
+  const q=input.value.trim().toLowerCase();let list=items.filter(x=>(active==="全部"||x.c===active)&&(!q||(x.t+x.q+x.s+x.c+x.n).toLowerCase().includes(q))&&(!odorFilter||odorScore(x)===odorFilter));
+  if(sortMode==="odor-desc")list.sort((a,b)=>odorScore(b)-odorScore(a)||a.t.localeCompare(b.t));else if(sortMode==="odor-asc")list.sort((a,b)=>odorScore(a)-odorScore(b)||a.t.localeCompare(b.t));else if(sortMode==="title")list.sort((a,b)=>a.t.localeCompare(b.t));
+  grid.innerHTML=list.map(x=>{const i=items.indexOf(x),fav=isFavorite(x),o=odorInfo(x);return '<article class="card '+(o.hazard?"hazard-card":"")+'" data-i="'+i+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><div class="card-badges">'+odorBadge(x)+'<button class="fav-card '+(fav?"on":"")+'" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div></div><h2>'+esc(x.t)+'</h2><div class="quote">“'+esc(x.q)+'”</div><div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}).join("");
+  document.querySelector("#empty").classList.toggle("hidden",list.length>0);document.querySelector("#totalCount").textContent=items.length;document.querySelector("#categoryCount").textContent=cats.length-1;const high=document.querySelector("#hazardCount");if(high)high.textContent=items.filter(x=>odorScore(x)===6).length;
+  grid.querySelectorAll(".card").forEach(el=>el.onclick=()=>detail(items[Number(el.dataset.i)]));grid.querySelectorAll(".fav-card").forEach(b=>b.onclick=e=>{e.stopPropagation();const x=items[Number(b.dataset.fav)],on=setFavorite(x,!isFavorite(x));b.classList.toggle("on",on);b.textContent=on?"★":"☆"});updateFavoriteCount();observeMedia();
 }
 function i18nMeta(x){return isFavorite(x)?"⭐ 已收藏 · 查看 →":"查看 →"}
 async function detail(x,pushUrl=true){
   if(pushUrl)updateUrl(x);
   const i=items.indexOf(x),fav=isFavorite(x),id=itemId(x);
-  document.querySelector("#detailContent").innerHTML='<div class="detail-head"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><div class="detail-actions"><button id="favBtn" class="detail-action '+(fav?"on":"")+'">'+(fav?"★ 已收藏":"☆ 收藏")+'</button><button id="shareBtn" class="detail-action">🔗 分享这坨</button></div></div><h2>'+esc(x.t)+'</h2>'+mediaHtml(i,"detail")+'<div class="quote">“'+esc(x.q)+'”</div><section class="dossier"><div class="dossier-title">🏷️ 馆藏档案</div><dl><div><dt>馆藏编号</dt><dd>'+esc(id)+'</dd></div><div><dt>分类</dt><dd>'+esc(x.c)+'</dd></div><div><dt>臭度标签</dt><dd>'+esc(x.l)+'</dd></div><div><dt>资料来源</dt><dd>'+esc(x.s)+'</dd></div><div><dt>原始语句</dt><dd>'+esc(x.q)+'</dd></div><div><dt>考古备注</dt><dd>'+esc(x.n)+'</dd></div></dl></section><div class="image-meta" id="imageMeta">🖼️ 正在查询原图与许可信息…</div><p><a href="'+esc(x.u)+'" target="_blank" rel="noopener">打开原始资料 ↗</a></p>';
+  document.querySelector("#detailContent").innerHTML='<div class="detail-head"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><div class="detail-actions"><button id="favBtn" class="detail-action '+(fav?"on":"")+'">'+(fav?"★ 已收藏":"☆ 收藏")+'</button><button id="shareBtn" class="detail-action">🔗 分享鉴定</button></div></div><h2>'+esc(x.t)+'</h2>'+certificateHtml(x,id)+mediaHtml(i,"detail")+'<div class="quote">“'+esc(x.q)+'”</div><section class="dossier"><div class="dossier-title">🏷️ 馆藏档案</div><dl><div><dt>馆藏编号</dt><dd>'+esc(id)+'</dd></div><div><dt>分类</dt><dd>'+esc(x.c)+'</dd></div><div><dt>臭度标签</dt><dd>'+esc(x.l)+'</dd></div><div><dt>资料来源</dt><dd>'+esc(x.s)+'</dd></div><div><dt>原始语句</dt><dd>'+esc(x.q)+'</dd></div><div><dt>考古备注</dt><dd>'+esc(x.n)+'</dd></div></dl></section><div class="image-meta" id="imageMeta">🖼️ 正在查询原图与许可信息…</div><p><a href="'+esc(x.u)+'" target="_blank" rel="noopener">打开原始资料 ↗</a></p>';
   document.querySelector("#detailDialog").showModal();
   document.querySelector("#favBtn").onclick=()=>{const on=setFavorite(x,!isFavorite(x));document.querySelector("#favBtn").classList.toggle("on",on);document.querySelector("#favBtn").textContent=on?"★ 已收藏":"☆ 收藏";render()};
   document.querySelector("#shareBtn").onclick=()=>shareItem(x);
@@ -94,10 +101,8 @@ async function detail(x,pushUrl=true){
 }
 
 nav.innerHTML=cats.map(c=>'<button class="category '+(c===active?"active":"")+'" data-c="'+esc(c)+'">'+esc(c)+"</button>").join("");
-nav.querySelectorAll("button").forEach(b=>b.onclick=()=>{active=b.dataset.c;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));render()});
-input.oninput=render;
-document.querySelector("#randomBtn").onclick=()=>detail(items[Math.floor(Math.random()*items.length)]);
-document.querySelector("#closeDialog").onclick=()=>{document.querySelector("#detailDialog").close();const u=new URL(location.href);u.searchParams.delete("id");history.replaceState({},"",u.toString())};
+nav.insertAdjacentHTML("beforebegin",'<div class="odor-controls">'+odorFilterOptions()+'</div>');
+const odorSelect=document.querySelector("#odorSelect"),sortSelect=document.querySelector("#sortSelect");odorSelect.onchange=()=>{odorFilter=Number(odorSelect.value);render()};sortSelect.onchange=()=>{sortMode=sortSelect.value;render()};nav.querySelectorAll("button").forEach(b=>b.onclick=()=>{active=b.dataset.c;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));render()});input.oninput=render;
 window.addEventListener("popstate",openById);
 document.querySelector("#favoriteBtn").onclick=()=>{const dialog=document.querySelector("#favoriteDialog");dialog.showModal();renderFavorites();};
 document.querySelector("#closeFavorites").onclick=()=>document.querySelector("#favoriteDialog").close();
