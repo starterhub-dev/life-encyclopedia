@@ -2,6 +2,19 @@ const items=[{"c":"逆天发言","l":"逆天","t":"我不会电脑","q":"I AM NO
 ;
 
 
+const CORE_ID_COUNT=items.length;
+const itemById=new Map();
+items.forEach((item,index)=>{
+  const id="core-"+String(index+1).padStart(4,"0");
+  Object.defineProperty(item,"id",{value:id,enumerable:true,writable:false,configurable:false});
+  itemById.set(id,item);
+});
+function legacyItemId(x){
+  let s=(x.c+"|"+x.t+"|"+x.q).normalize("NFKC"),h=2166136261;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}
+  return "it-"+(h>>>0).toString(36);
+}
+
 const ODOR_LEVELS={1:{level:"Lv.1",name:"轻度污染",icon:"🟢",color:"#10b981",bg:"rgba(16,185,129,.1)",desc:"尚在可控范围，建议保持观望。"},2:{level:"Lv.2",name:"有点臭",icon:"🟡",color:"#f59e0b",bg:"rgba(245,158,11,.1)",desc:"开始发酵，注意心理防护。"},3:{level:"Lv.3",name:"恶臭",icon:"🟠",color:"#f97316",bg:"rgba(249,115,22,.1)",desc:"刺鼻难耐，建议保持安全距离。"},4:{level:"Lv.4",name:"极臭",icon:"🔴",color:"#ef4444",bg:"rgba(239,68,68,.1)",desc:"破防警告，脑干受到直接冲击！"},5:{level:"Lv.5",name:"逆天",icon:"🟣",color:"#a855f7",bg:"rgba(168,85,247,.1)",desc:"逻辑崩塌，人类文明面临挑战！"},6:{level:"Lv.6",name:"馆藏级污染",icon:"🗿",color:"#8b5cf6",bg:"rgba(139,92,246,.2)",desc:"⚠️ 不建议徒手接触！馆长亲自戴手套封存 💩🧤",hazard:true}};
 const ODOR_OVERRIDES=new Set(["My name is cow","老八：奥利给，干了！","老八胃大","只因你太美"]);
 function odorScore(x){const l=String(x.l||"");if(l==="馆藏级污染"||x.hazard)return 6;if(ODOR_OVERRIDES.has(x.t))return 6;if(l==="逆天"||l.includes("蠢贼"))return 5;if(l==="极臭"||x.c==="极臭")return 4;if(l==="恶臭"||x.c==="恶臭")return 3;if(l==="抽象")return 2;return 1}
@@ -71,16 +84,30 @@ async function fillMedia(el,x){if(!el||el.dataset.loaded)return;const data=await
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
   const io=new IntersectionObserver(entries=>{entries.filter(e=>e.isIntersecting).forEach(e=>{const el=e.target;io.unobserve(el);fillMedia(el,items[Number(el.dataset.media)])})},{rootMargin:"700px"});els.forEach(el=>io.observe(el))}
 const FAVORITES_KEY="internet-trash-favorites";
-function itemId(x){let s=(x.c+"|"+x.t+"|"+x.q).normalize("NFKC"),h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return "it-"+(h>>>0).toString(36)}
-function getFavorites(){try{return JSON.parse(localStorage.getItem(FAVORITES_KEY)||"[]")}catch(e){return []}}
+function itemId(x){return x.id||legacyItemId(x)}
+function resolveItemId(id){
+  if(itemById.has(id))return itemById.get(id);
+  return items.find(x=>legacyItemId(x)===id)||null;
+}
+function getFavorites(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(FAVORITES_KEY)||"[]");
+    const migrated=[...new Set(raw.map(id=>resolveItemId(id)?.id||id))];
+    if(JSON.stringify(migrated)!==JSON.stringify(raw))localStorage.setItem(FAVORITES_KEY,JSON.stringify(migrated));
+    return migrated;
+  }catch(e){return []}
+}
 function isFavorite(x){return getFavorites().includes(itemId(x))}
-function setFavorite(x,on){const a=getFavorites(),id=itemId(x),next=on?[...new Set([...a,id])]:a.filter(v=>v!==id);localStorage.setItem(FAVORITES_KEY,JSON.stringify(next));updateFavoriteCount();return on}
+function setFavorite(x,on){
+  const a=getFavorites(),id=itemId(x),next=on?[...new Set([...a,id])]:a.filter(v=>v!==id);
+  localStorage.setItem(FAVORITES_KEY,JSON.stringify(next));updateFavoriteCount();return on
+}
 function updateFavoriteCount(){const n=getFavorites().length;const el=document.querySelector("#favoriteCount");if(el)el.textContent=n}
 function updateUrl(x){const url=new URL(location.href);url.searchParams.set("id",itemId(x));history.replaceState({id:itemId(x)},"",url)}
 function shareItem(x){const url=new URL(location.href);url.searchParams.set("id",itemId(x));const o=odorInfo(x);const text="💩【互联网臭狗屎博物馆·馆藏鉴定】\n展品：《"+x.t+"》\n臭度评级："+o.icon+" "+o.level+" "+o.name+(o.hazard?"（馆长亲自封存）":"")+"\n鉴定意见："+o.desc+"\n🔗 "+url.toString();if(navigator.share){navigator.share({title:"互联网臭狗屎博物馆 · "+x.t,text,url:url.toString()}).catch(()=>{})}else if(navigator.clipboard){navigator.clipboard.writeText(text).then(()=>showToast("📋 鉴定证书分享文案已复制"))}else{prompt("复制馆藏鉴定文案：",text)}}
-function openById(){const id=new URLSearchParams(location.search).get("id");if(!id)return;const x=items.find(v=>itemId(v)===id);if(x)detail(x,false)}
+function openById(){const id=new URLSearchParams(location.search).get("id");if(!id)return;const x=resolveItemId(id);if(x)detail(x,false)}
 
-function cardHtml(x){const i=items.indexOf(x),fav=isFavorite(x),o=odorInfo(x);return '<article class="card '+(o.hazard?"hazard-card":"")+'" data-i="'+i+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><div class="card-badges">'+odorBadge(x)+'<button class="fav-card '+(fav?"on":"")+'" data-action="favorite" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div></div><h2>'+esc(x.t)+'</h2><div class="quote">“'+esc(x.q)+'”</div><div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}
+function cardHtml(x){const i=items.indexOf(x),fav=isFavorite(x),o=odorInfo(x);return '<article class="card '+(o.hazard?"hazard-card":"")+'" data-i="'+i+'" data-id="'+esc(itemId(x))+'">'+mediaHtml(i)+'<div class="card-top"><span class="tag '+cls(x.c)+'">'+esc(x.c)+" · "+esc(x.l)+'</span><div class="card-badges">'+odorBadge(x)+'<button class="fav-card '+(fav?"on":"")+'" data-action="favorite" data-fav="'+i+'" title="'+(fav?"取消收藏":"收藏")+'">'+(fav?"★":"☆")+'</button></div></div><h2>'+esc(x.t)+'</h2><div class="quote">“'+esc(x.q)+'”</div><div class="meta"><span>'+esc(x.s)+'</span><span>'+i18nMeta(x)+'</span></div></article>'}
 function appendBatch(){const rendered=grid.querySelectorAll(".card").length,next=filteredItems.slice(rendered,visibleCount);if(!next.length){if(appendObserver)appendObserver.disconnect();const old=document.querySelector("#loadMoreSentinel");if(old)old.remove();return}const sentinel=document.querySelector("#loadMoreSentinel");if(sentinel)sentinel.remove();grid.insertAdjacentHTML("beforeend",next.map(cardHtml).join(""));observeMedia();if(visibleCount<filteredItems.length){grid.insertAdjacentHTML("beforeend",'<div id="loadMoreSentinel" class="load-more-sentinel">🗿 正在搬运下一批馆藏……</div>');const el=document.querySelector("#loadMoreSentinel");if(appendObserver)appendObserver.disconnect();if("IntersectionObserver" in window){appendObserver=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting)){visibleCount+=48;appendBatch()}},{rootMargin:"500px"});appendObserver.observe(el)}}}
 function render(){
  const q=input.value.trim().toLowerCase();filteredItems=items.filter(x=>(active==="全部"||x.c===active)&&(!q||(x.t+x.q+x.s+x.c+x.n).toLowerCase().includes(q))&&(!odorFilter||odorScore(x)===odorFilter));
@@ -104,10 +131,10 @@ nav.innerHTML=cats.map(c=>'<button class="category '+(c===active?"active":"")+'"
 nav.insertAdjacentHTML("beforebegin",'<div class="odor-controls">'+odorFilterOptions()+'</div>');
 const odorSelect=document.querySelector("#odorSelect"),sortSelect=document.querySelector("#sortSelect");odorSelect.onchange=()=>{odorFilter=Number(odorSelect.value);render()};sortSelect.onchange=()=>{sortMode=sortSelect.value;render()};nav.onclick=e=>{const b=e.target.closest("button[data-c]");if(!b)return;active=b.dataset.c;nav.querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));render()};
 input.oninput=()=>{clearTimeout(searchTimer);searchTimer=setTimeout(render,250)};
-grid.addEventListener("click",e=>{const fav=e.target.closest('[data-action="favorite"]');if(fav){e.stopPropagation();const x=items[Number(fav.dataset.fav)],on=setFavorite(x,!isFavorite(x));fav.classList.toggle("on",on);fav.textContent=on?"★":"☆";return}const card=e.target.closest(".card[data-i]");if(card)detail(items[Number(card.dataset.i)])});
+grid.addEventListener("click",e=>{const fav=e.target.closest('[data-action="favorite"]');if(fav){e.stopPropagation();const x=resolveItemId(fav.closest(".card")?.dataset.id)||items[Number(fav.dataset.fav)],on=setFavorite(x,!isFavorite(x));fav.classList.toggle("on",on);fav.textContent=on?"★":"☆";return}const card=e.target.closest(".card[data-i]");if(card){const x=resolveItemId(card.dataset.id)||items[Number(card.dataset.i)];if(x)detail(x)}});
 window.addEventListener("popstate",openById);
 document.querySelector("#favoriteBtn").onclick=()=>{const dialog=document.querySelector("#favoriteDialog");dialog.showModal();renderFavorites();};
 document.querySelector("#closeFavorites").onclick=()=>document.querySelector("#favoriteDialog").close();
 document.querySelector("#favoriteList").onclick=e=>{const row=e.target.closest("[data-fav-item]");if(row){document.querySelector("#favoriteDialog").close();detail(items.find(x=>itemId(x)===row.dataset.favItem))}};
-function renderFavorites(){const ids=getFavorites();const el=document.querySelector("#favoriteList");el.innerHTML=ids.length?ids.map(id=>{const x=items.find(v=>itemId(v)===id);return x?'<button class="favorite-row" data-fav-item="'+id+'"><span>💩</span><span><strong>'+esc(x.t)+'</strong><small>'+esc(x.c)+" · "+esc(x.l)+'</small></span><span>查看 →</span></button>':""}).join(""):'<div class="favorite-empty">🗿 还没有收藏任何一坨。</div>'}
+function renderFavorites(){const ids=getFavorites();const el=document.querySelector("#favoriteList");el.innerHTML=ids.length?ids.map(id=>{const x=resolveItemId(id);return x?'<button class="favorite-row" data-fav-item="'+id+'"><span>💩</span><span><strong>'+esc(x.t)+'</strong><small>'+esc(x.c)+" · "+esc(x.l)+'</small></span><span>查看 →</span></button>':""}).join(""):'<div class="favorite-empty">🗿 还没有收藏任何一坨。</div>'}
 render();updateFavoriteCount();setTimeout(openById,0);
