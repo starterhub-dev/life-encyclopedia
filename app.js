@@ -615,9 +615,9 @@ function tryRenderMediaCandidate(el,x,data,isCancelled){
     const img=el.querySelector("img");if(!img){resolve(false);return}
     let next=0,settled=false,timer;
     const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);img.onload=null;img.onerror=null;resolve(ok)};
-    const tryNext=()=>{if(isCancelled()){finish(false);return}if(next<sources.length){img.src=sources[next++];return}finish(false)};
-    img.onload=()=>{if(isCancelled()){finish(false);return}el.dataset.loaded="1";el.dataset.pending="";el.__museumImageData=data;recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");finish(true)};
-    img.onerror=tryNext;timer=setTimeout(()=>finish(false),7000);tryNext();
+    const tryNext=()=>{if(isCancelled()){finish(false);return}if(next<sources.length){img.src=sources[next++];clearTimeout(timer);timer=setTimeout(tryNext,6500);return}finish(false)};
+    img.onload=()=>{if(isCancelled()){finish(false);return}el.dataset.loaded="1";el.dataset.pending="";el.__museumImageData=data;finish(true)};
+    img.onerror=tryNext;tryNext();
   });
 }
 
