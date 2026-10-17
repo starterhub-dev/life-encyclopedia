@@ -70,6 +70,108 @@ const curatedImageOverrides={
     page:"https://ecywang.com/pic/%E6%8A%A2%E8%8F%9C%E8%A1%A8%E6%83%85%E5%8C%85/",
     license:"来源页面可查；图片再使用许可未核实",
     creditLabel:"“改革开放的春风把你吹傻了吗”相关衍生梗图 · 非小品原始画面"
+  },
+  "爷青回":{
+    thumb:"https://picview.iituku.com/content/img/202202/08/0aae09039415e404.jpg/wh860.jpg",
+    original:"https://picview.iituku.com/content/img/202202/08/0aae09039415e404.jpg/wh860.jpg",
+    page:"https://www.iituku.com/detail/5414.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“爷青回”文字表情图 · 来源页"
+  },
+  "爷青结":{
+    thumb:"https://st-gdx.dancf.com/gaodingx/0/uxms/design/20211012-151826-858a.png",
+    original:"https://st-gdx.dancf.com/gaodingx/0/uxms/design/20211012-151826-858a.png",
+    page:"https://www.gaoding.com/template/100006371",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“爷青结”文字表情图 · 稿定设计来源页"
+  },
+  "蚌埠住了":{
+    thumb:"https://picview.iituku.com/content/img/202201/28/cfc39877fbbcebbc.jpg/wh860.jpg",
+    fallbacks:["https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/67dc208358703XHQ.gif"],
+    original:"https://picview.iituku.com/content/img/202201/28/cfc39877fbbcebbc.jpg/wh860.jpg",
+    page:"https://www.iituku.com/detail/5128.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“蚌埠住了”文字表情图 · 来源页"
+  },
+  "蚌埠住":{
+    thumb:"https://picview.iituku.com/content/img/202201/28/cfc39877fbbcebbc.jpg/wh860.jpg",
+    fallbacks:["https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/67dc208358703XHQ.gif"],
+    original:"https://picview.iituku.com/content/img/202201/28/cfc39877fbbcebbc.jpg/wh860.jpg",
+    page:"https://www.iituku.com/detail/5128.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“蚌埠住了”文字表情图 · 来源页"
+  },
+  "破防了":{
+    thumb:"https://picview.iituku.com/content/img/202202/08/f7723a2000296e65.jpg/wh860.jpg",
+    fallbacks:["https://picview.iituku.com/content/img/202202/08/ca71e069059976b6.jpg/wh1200.jpg"],
+    original:"https://picview.iituku.com/content/img/202202/08/f7723a2000296e65.jpg/wh860.jpg",
+    page:"https://www.iituku.com/detail/5612.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“破防了”文字表情图 · 来源页"
+  },
+  "破大防了":{
+    thumb:"https://picview.iituku.com/content/img/202202/08/ca71e069059976b6.jpg/wh1200.jpg",
+    fallbacks:["https://picview.iituku.com/content/img/202202/08/f7723a2000296e65.jpg/wh860.jpg"],
+    original:"https://picview.iituku.com/content/img/202202/08/ca71e069059976b6.jpg/wh1200.jpg",
+    page:"https://www.iituku.com/detail/5614.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“破大防了”文字表情图 · 来源页"
+  },
+  "绷不住了":{
+    thumb:"https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6266f2403256cCNe.gif",
+    original:"https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/6266f2403256cCNe.gif",
+    page:"https://www.qiubiaoqing.com/img_detail/359729470795415552.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“绷不住了”动态表情图 · 来源页"
+  },
+  "麻了":{
+    thumb:"https://www.danmuxiu.cn/uploads/allimg/210316/1-21031622225A29.jpg",
+    original:"https://www.danmuxiu.cn/uploads/allimg/210316/1-21031622225A29.jpg",
+    page:"https://www.danmuxiu.cn/450.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“麻了，彻底麻了”柴犬表情图 · 来源页"
+  },
+  "人麻了":{
+    thumb:"https://www.danmuxiu.cn/uploads/allimg/210316/1-21031622225A29.jpg",
+    original:"https://www.danmuxiu.cn/uploads/allimg/210316/1-21031622225A29.jpg",
+    page:"https://www.danmuxiu.cn/450.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“麻了，彻底麻了”柴犬表情图 · 适用于“人麻了”语境"
+  },
+  "CPU给干烧了":{
+    thumb:"https://acf.geeknetic.es/imgri/imagenes/auto/24/07/23/d3g-los-problemas-de-inestabilidad-en-los-intel-13-y-14-gen-siguen-apuntando-a-un-voltaje-incorrecto.jpg?f=webp",
+    original:"https://acf.geeknetic.es/imgri/imagenes/auto/24/07/23/d3g-los-problemas-de-inestabilidad-en-los-intel-13-y-14-gen-siguen-apuntando-a-un-voltaje-incorrecto.jpg?f=webp",
+    page:"https://www.geeknetic.es/Noticia/32264/Los-problemas-de-inestabilidad-en-los-Intel-13-y-14-Gen-siguen-apuntando-a-un-voltaje-incorrecto.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"CPU过热概念插画 · 主题关联图，非原始网络表情"
+  },
+  "电子榨菜":{
+    thumb:"https://app-stc.zjol.com.cn/assets/20230203/1675384020920_63dc54d488901800017b869d.jpeg",
+    original:"https://app-stc.zjol.com.cn/assets/20230203/1675384020920_63dc54d488901800017b869d.jpeg",
+    page:"https://tidenews.com.cn/news.html?id=744041",
+    license:"来源页面标注图源；图片再使用许可未核实",
+    creditLabel:"“电子榨菜”主题插画 · 潮新闻来源页"
+  },
+  "窝窝头一块钱四个":{
+    thumb:"https://c-ssl.dtstatic.com/uploads/blog/202212/23/20221223013756_ed8b1.thumb.1000_0.jpg",
+    original:"https://c-ssl.dtstatic.com/uploads/blog/202212/23/20221223013756_ed8b1.thumb.1000_0.jpg",
+    page:"https://www.duitang.com/blog/?id=1443761420",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“窝窝头一块钱四个”文字表情图 · 来源页"
+  },
+  "My name is cow":{
+    thumb:"https://i.imgur.com/XSCF602.jpeg",
+    original:"https://i.imgur.com/XSCF602.jpeg",
+    page:"https://imgur.com/gallery/name-is-cow-LWlHl",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“My name is cow”原梗图 · Imgur 来源页"
+  },
+  "赢麻了":{
+    thumb:"https://ugc-img.ifengimg.com/img/2022/8/8/8IFwT5Ixu2h/76efd501-c08e-4db8-bdb0-7f5b25a3f2f4_w1296_h864.jpeg",
+    original:"https://ugc-img.ifengimg.com/img/2022/8/8/8IFwT5Ixu2h/76efd501-c08e-4db8-bdb0-7f5b25a3f2f4_w1296_h864.jpeg",
+    page:"https://fo.ifeng.com/c/8IFwT5Ixu2h",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“赢麻了”主题配图 · 凤凰网来源页"
   }
 };
 function curatedImageFor(x){
