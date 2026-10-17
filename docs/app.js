@@ -16,6 +16,18 @@ const grid=document.querySelector("#grid"),input=document.querySelector("#search
 
 function cls(c){return c==="极臭"?"extreme":c==="恶臭"?"stinky":c==="政治抽象"?"politics":c==="黑色幽默"?"black":c==="简中互联网"?"cn":c==="全球互联网"?"global":c==="历史地狱笑话"?"history":c==="互联网党争与蠢贼"?"war":"absurd"}
 const imageHints={"曼巴OUT":["Kobe Bryant Mamba Out meme"],"Man What Can I Say":["Kobe Bryant","Mamba Out"],"凌晨四点的洛杉矶梗":["Kobe Bryant 4 AM Los Angeles"],"牢大梗":["Kobe Bryant meme"],"科比相关互联网迷因":["Kobe Bryant meme"],"佐巴扬梗":["Kobe Bryant meme"],"苹果党 vs 安卓党":["iPhone Android meme"],"iPhone党 vs 安卓党":["iPhone Android meme"],"苹果安卓年度圣战":["iPhone Android meme"],"苹果党":["Apple fan Android meme"],"安卓党":["Android fan iPhone meme"],"折叠屏党争":["foldable phone meme"],"LCD永不为奴":["LCD screen meme"],"OLED党":["OLED smartphone meme"],"手机影像大战":["smartphone camera meme"],"华为 vs iPhone":["Huawei iPhone meme"],"电车党 vs 油车党":["electric car gasoline car meme"],"新能源 vs 燃油车":["electric car petrol car meme"],"电车没有灵魂梗":["electric car meme"],"油车祖传技术梗":["gasoline car meme"],"增程到底算不算电车":["range extender electric car meme"],"插混 vs 增程":["plug in hybrid range extender meme"],"纯电 vs 混动":["electric hybrid car meme"],"零百大战":["0-100 acceleration car meme"],"V8信仰":["V8 engine meme"],"冰箱彩电大沙发梗":["Chinese EV meme refrigerator TV sofa"],"汽车论坛祖传口水战":["car forum meme"],"真实蠢贼：作案后自拍":["dumb criminal selfie"],"真实蠢贼：留下身份证":["dumb criminal police evidence"],"真实蠢贼：留下手机号":["dumb criminal phone number"],"真实蠢贼：监控前露脸":["dumb criminal CCTV"],"真实蠢贼：偷车却不会开":["car thief meme"],"真实蠢贼：逃跑坐错车":["dumb criminal meme"],"真实蠢贼：网上出售赃物广告":["dumb criminal selling stolen goods"],"蠢贼新闻：最好的卧底是自己":["dumb criminal news"],"肘击王":["elbow meme basketball"],"饭桌肘击王":["elbow meme"],"地铁肘击王":["elbow meme"],"鸵鸟肘击":["ostrich elbow meme"],"肘击奶奶梗":["elbow meme"],"河南人偷井盖梗":["Henan manhole cover meme"],"偷井盖梗考古":["manhole cover meme China"],"井盖消失文学":["manhole cover meme"],"地域刻板印象梗":["regional stereotype meme China"],"历史地狱笑话":["history meme"],"路易十六：逛街摸不着头脑，最后真的掉脑袋":["Louis XVI guillotine meme"],"泰坦尼克号：冰山表示我不同意":["Titanic iceberg meme"],"拿破仑：Nothing we can do":["Napoleon nothing we can do meme"],"罗马帝国：我怎么天天被想起":["Roman Empire meme"],"凯撒：我只是去了一趟元老院":["Julius Caesar Senate meme"],"崔佛":["Trevor GTA meme"],"Rickroll":["Rickroll"],"Doge":["Doge meme"],"Wojak":["Wojak meme"],"GigaChad":["Gigachad meme"],"Polish Cow":["Polish Cow meme"],"Italian Brainrot":["Italian brainrot meme"],"Tralalero Tralala":["Tralalero Tralala"],"PPAP":["Pen Pineapple Apple Pen"],"Coffin Dance":["Coffin Dance"],"Ugandan Knuckles":["Ugandan Knuckles"],"Skibidi Toilet":["Skibidi Toilet meme"],"Ohio":["Ohio meme"],"Rizz":["Rizz meme"],"Gyatt":["Gyatt meme"],"Fanum Tax":["Fanum Tax meme"],"Surprised Pikachu":["Surprised Pikachu meme"],"This Is Fine":["This Is Fine meme"],"Distracted Boyfriend":["Distracted Boyfriend meme"],"Woman Yelling at Cat":["Woman Yelling at Cat meme"],"Drakeposting":["Drake Hotline Bling meme"]};
+const curatedImageOverrides={
+  "孙笑川“打奶奶”":{
+    thumb:"https://n.sinaimg.cn/translate/501/w320h181/20180821/kGWe-hhzsnea2079110.gif",
+    original:"https://n.sinaimg.cn/translate/501/w320h181/20180821/kGWe-hhzsnea2079110.gif",
+    page:"https://k.sina.com.cn/article_5573708715_14c380bab01900d1do.html",
+    title:"“打奶奶”谣言传播中的网络迷因 GIF",
+    license:"转载授权状态未核实；请查看来源页面",
+    artist:"新浪新闻报道配图",
+    query:"打奶奶谣言相关网络迷因",
+    creditLabel:"新浪新闻报道配图 · 网络谣言考古（非事实证据）"
+  }
+};
 const imageCache=new Map(),imagePending=new Map();
 function normalizeSearch(v){return String(v||"").replace(/[“”"'：:（）()【】\[\]！？!?，,。·]/g," ").replace(/\s+/g," ").trim()}
 function imageQueryVariants(x){
@@ -56,6 +68,7 @@ async function commonsSearch(variant,x){
 }
 async function commonsImage(x){
   const key=x.t+"|"+x.q;if(imageCache.has(key))return imageCache.get(key);if(imagePending.has(key))return imagePending.get(key);
+  const curated=curatedImageOverrides[x.t];if(curated){imageCache.set(key,curated);return curated}
   const promise=(async()=>{try{
     const variants=imageQueryVariants(x);if(!variants.length){imageCache.set(key,null);return null}
     for(const v of variants){const data=await commonsSearch(v,x);if(data&&scoreCandidate(data,v,x)>1){imageCache.set(key,data);return data}}
@@ -67,7 +80,8 @@ function mediaHtml(i,kind){const k=kind||"card";const box=k==="detail"?"detail-m
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 async function fillMedia(el,x){if(!el||el.dataset.loaded)return;const data=await commonsImage(x);if(!el.isConnected)return;el.dataset.loaded="1";el.classList.remove("media-loading");
   if(!data){el.innerHTML='<div class="media-placeholder no-image">🗿 图片考古结果：驴头不对马嘴，暂不自动配图<br><a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener">手动去 Commons 找原图 ↗</a></div>';return}
-  el.innerHTML='<a class="media-link" href="'+data.original+'" target="_blank" rel="noopener"><img loading="lazy" src="'+data.thumb+'" alt="'+esc(x.t)+'"></a><div class="media-credit">Wikimedia Commons · '+esc(data.license)+'</div>'}
+  const sourcePage=data.page||data.original,credit=data.creditLabel||("Wikimedia Commons · "+(data.license||"许可证见文件页"));
+  el.innerHTML='<a class="media-link" href="'+esc(sourcePage)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(data.thumb)+'" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(sourcePage)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>'}
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
   const io=new IntersectionObserver(entries=>{entries.filter(e=>e.isIntersecting).forEach(e=>{const el=e.target;io.unobserve(el);fillMedia(el,items[Number(el.dataset.media)])})},{rootMargin:"700px"});els.forEach(el=>io.observe(el))}
 const FAVORITES_KEY="internet-trash-favorites";
@@ -97,7 +111,7 @@ async function detail(x,pushUrl=true){
   document.querySelector("#shareBtn").onclick=()=>shareItem(x);
   const media=document.querySelector('#detailContent [data-media]'),metaBox=document.querySelector("#imageMeta");const data=await commonsImage(x);if(!media||!metaBox)return;
   if(!data){media.classList.remove("media-loading");media.innerHTML='<div class="media-placeholder no-image">🗿 图片考古结果：驴头不对马嘴，暂不自动配图<br><a href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener">去 Commons 手动找原图 ↗</a></div>';metaBox.textContent="未找到足够可信的 Commons 图片匹配。";return}
-  media.classList.remove("media-loading");media.dataset.loaded="1";media.innerHTML='<a class="media-link" href="'+data.original+'" target="_blank" rel="noopener"><img src="'+data.thumb+'" alt="'+esc(x.t)+'"></a><div class="media-credit">Wikimedia Commons · '+esc(data.license)+'</div>';metaBox.innerHTML='许可：<strong>'+esc(data.license)+'</strong>'+(data.artist?" · 作者/署名："+esc(data.artist):"")+' · 搜索词：'+esc(data.query)+' · <a href="'+esc(data.page)+'" target="_blank" rel="noopener">打开文件页 ↗</a>';
+  media.classList.remove("media-loading");media.dataset.loaded="1";media.innerHTML='<a class="media-link" href="'+esc(data.page||data.original)+'" target="_blank" rel="noopener"><img src="'+esc(data.thumb)+'" alt="'+esc(x.t)+'"></a><div class="media-credit">'+esc(data.creditLabel||("Wikimedia Commons · "+(data.license||"许可证见文件页")))+'</div>';metaBox.innerHTML='许可/来源说明：<strong>'+esc(data.license||"请查看来源页面")+'</strong>'+(data.artist?" · 作者/署名："+esc(data.artist):"")+' · 搜索词：'+esc(data.query||"人工精选素材")+' · <a href="'+esc(data.page||data.original)+'" target="_blank" rel="noopener">打开来源页 ↗</a>';
 }
 
 nav.innerHTML=cats.map(c=>'<button class="category '+(c===active?"active":"")+'" data-c="'+esc(c)+'">'+esc(c)+"</button>").join("");
