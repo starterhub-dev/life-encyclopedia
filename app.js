@@ -427,7 +427,7 @@ function imageQueryVariants(x){
   for(const term of categoryTerms)if(t)variants.push(t+" "+term);
   const sourceLabel=String(x.s||"").split(/[·|—-]/)[0].trim();
   if(t&&sourceLabel&&sourceLabel.length<36&&!/reddit|b站|bilibili|knowyourmeme/i.test(sourceLabel))variants.push(t+" "+sourceLabel);
-  return [...new Set(variants.filter(Boolean))].slice(0,5);
+  return [...new Set(variants.filter(Boolean))].slice(0,3);
 }
 function scoreCandidate(page,variant,x){
   const title=normalizeSearch(page.title||"").toLowerCase();
@@ -449,9 +449,14 @@ function scoreCandidate(page,variant,x){
 }
 async function commonsSearch(variant,x){
   const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(variant)+"&gsrnamespace=6&gsrlimit=12&prop=imageinfo|categories&iiprop=url|mime|size|thumburl|extmetadata&iiurlwidth=900&format=json&origin=*";
-  const r=await fetch(url,{headers:{Accept:"application/json"}});
-  if(!r.ok)throw new Error("HTTP "+r.status);
-  const j=await r.json();
+  const j=await enqueueSourceImageRequest(async()=>{
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),8000);
+    try{
+      const r=await fetch(url,{headers:{Accept:"application/json"},signal:controller.signal});
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      return await r.json();
+    }finally{clearTimeout(timeout)}
+  });
   const pages=j.query&&j.query.pages?Object.values(j.query.pages):[];
   pages.sort((a,b)=>scoreCandidate(b,variant,x)-scoreCandidate(a,variant,x));
   const p=pages[0],info=p&&p.imageinfo&&p.imageinfo[0];
@@ -498,13 +503,14 @@ function fallbackSvg(x){
   const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p[1]+'"/><stop offset="1" stop-color="#0d1015"/></linearGradient><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#fff" stroke-opacity=".05"/></pattern></defs><rect width="900" height="520" fill="url(#g)"/><rect width="900" height="520" fill="url(#grid)"/><circle cx="730" cy="185" r="112" fill="none" stroke="'+p[0]+'" stroke-width="3" opacity=".65"/><circle cx="730" cy="185" r="70" fill="'+p[0]+'" opacity=".12"/><rect x="286" y="142" width="328" height="218" rx="22" fill="#0d1015" fill-opacity=".55" stroke="'+p[0]+'" stroke-width="5"/><path d="M324 315l80-82 65 62 46-42 62 62" fill="none" stroke="'+p[0]+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="536" cy="192" r="17" fill="'+p[0]+'"/><text x="48" y="62" fill="'+p[0]+'" font-family="system-ui,sans-serif" font-size="18" font-weight="800" letter-spacing="3">MUSEUM RECONSTRUCTION</text><text x="48" y="108" fill="#f4f6f8" font-family="system-ui,sans-serif" font-size="30" font-weight="800">'+title+'</text><text x="48" y="450" fill="#aeb6c2" font-family="system-ui,sans-serif" font-size="18">'+quote+'</text><text x="48" y="482" fill="#68717e" font-family="system-ui,sans-serif" font-size="14">'+cat+' · 非原始梗图，尚未找到可靠匹配</text></svg>';
   return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
 }
-function renderMediaFallback(el,x){
+function renderMediaFallback(el,x,reason){
   el.dataset.loaded="1";
   el.dataset.pending="";
   el.classList.remove("media-loading");
-  recordImageAudit(x,"reconstruction","No high-confidence image match");
+  const failed=reason==="failed";
+  recordImageAudit(x,failed?"failed":"reconstruction",reason||(failed?"All candidate image URLs failed":"No high-confidence image match"));
   const src=fallbackSvg(x);
-  el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · 尚未找到可验证的原始梗图 · 点击继续考古</div>';
+  el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · '+(failed?"候选图片地址均加载失败":"尚未找到高置信度原图")+' · 点击继续考古</div>';
 }
 async function fillMedia(el,x){
   if(!el||el.dataset.loaded==="1"||el.dataset.pending==="1")return;
@@ -515,26 +521,24 @@ async function fillMedia(el,x){
   if(!el.isConnected)return;
   el.dataset.pending="";
   if(!data){renderMediaFallback(el,x);return}
-  el.dataset.loaded="1";
   el.classList.remove("media-loading");
   const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
-  const credit=data.creditLabel||("🟢 原图匹配 · Wikimedia Commons · "+(data.license||"许可见文件页"));
-  const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[])].filter(Boolean);
-  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img referrerpolicy="no-referrer" loading="lazy" decoding="async" src="'+esc(sources[0]||data.original||"")+'" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
+  const credit=data.creditLabel||("🟢 "+(data.sourceType==="openverse"?"Openverse":"Wikimedia Commons")+" · "+(data.license||"许可见文件页"));
+  const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[]),data.original].filter((url,i,all)=>Boolean(url)&&all.indexOf(url)===i);
+  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img referrerpolicy="no-referrer" loading="lazy" decoding="async" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
   const img=el.querySelector("img");
-  if(img){
-    let next=1;
-    img.onload=function(){
-      if(data.sourceType==="openverse")recordImageAudit(x,"loaded","Openverse result loaded");
-      else recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
-    };
-    img.onerror=function(){
-      if(next<sources.length){img.src=sources[next++];return}
-      img.onerror=null;
-      recordImageAudit(x,"failed","All candidate image URLs failed");
-      renderMediaFallback(el,x);
-    };
-  }
+  if(!img||!sources.length){renderMediaFallback(el,x,"failed");return}
+  let next=1;
+  img.onload=function(){
+    el.dataset.loaded="1";
+    recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
+  };
+  img.onerror=function(){
+    if(next<sources.length){img.src=sources[next++];return}
+    img.onerror=null;
+    renderMediaFallback(el,x,"failed");
+  };
+  img.src=sources[0];
 }
 
 const IMAGE_AUDIT_KEY="life-encyclopedia-image-audit-v1";
