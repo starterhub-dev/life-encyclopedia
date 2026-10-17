@@ -239,6 +239,22 @@ const curatedImageOverrides={
     license:"来源页面可查；图片再使用许可未核实",
     creditLabel:"“路過”人物与小狗贴图 · 与“路过的”语义相关",
     sourceType:"curated"
+  },
+  "大聪明":{
+    thumb:"https://img.soogif.com/IUGtFDISnG74RfZ7OvWyTQMnmy4vQzS3.JPEG",
+    original:"https://img.soogif.com/IUGtFDISnG74RfZ7OvWyTQMnmy4vQzS3.JPEG",
+    page:"https://ecywang.com/pic/%E5%A4%A7%E8%81%AA%E6%98%8E%E8%A1%A8%E6%83%85%E5%9B%BE/",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“赐我智慧吧”熊猫头表情图 · 大聪明/智慧主题配图，非特定原梗图",
+    sourceType:"curated"
+  },
+  "细思极恐":{
+    thumb:"https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/60824681af34cEQX.gif",
+    original:"https://imgs.qiubiaoqing.com/qiubiaoqing/imgs/60824681af34cEQX.gif",
+    page:"https://www.qiubiaoqing.com/img_detail/333599406676770816.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“看过的人都陷入了沉思”熊猫头动图 · 细思极恐语境关联图，非唯一原梗图",
+    sourceType:"curated"
   }
 };
 function curatedImageFor(x){
