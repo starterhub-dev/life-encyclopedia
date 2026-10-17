@@ -210,15 +210,30 @@ function saveSourcePageImage(url,data){
 }
 function enqueueSourceImageRequest(task){
   return new Promise((resolve,reject)=>{
-    sourceImageQueue.push({task,resolve,reject});
+    const job={task,resolve,reject,started:false,settled:false,queueTimer:null};
+    job.queueTimer=setTimeout(()=>{
+      if(job.started||job.settled)return;
+      const index=sourceImageQueue.indexOf(job);
+      if(index>=0)sourceImageQueue.splice(index,1);
+      job.settled=true;
+      reject(new Error("Image request queue wait timed out"));
+    },6500);
+    sourceImageQueue.push(job);
     drainSourceImageQueue();
   });
 }
 function drainSourceImageQueue(){
   while(activeSourceImageRequests<2&&sourceImageQueue.length){
     const job=sourceImageQueue.shift();
+    if(job.settled)continue;
+    job.started=true;
+    clearTimeout(job.queueTimer);
     activeSourceImageRequests++;
-    Promise.resolve().then(job.task).then(job.resolve,job.reject).finally(()=>{
+    Promise.resolve().then(job.task).then(value=>{
+      if(!job.settled){job.settled=true;job.resolve(value);}
+    },error=>{
+      if(!job.settled){job.settled=true;job.reject(error);}
+    }).finally(()=>{
       activeSourceImageRequests--;
       drainSourceImageQueue();
     });
@@ -508,37 +523,67 @@ function renderMediaFallback(el,x,reason){
   el.dataset.pending="";
   el.classList.remove("media-loading");
   const failed=reason==="failed";
-  recordImageAudit(x,failed?"failed":"reconstruction",reason||(failed?"All candidate image URLs failed":"No high-confidence image match"));
+  const timedOut=reason==="timeout";
+  const auditDetail=timedOut?"Image lookup exceeded its deadline":(reason||(failed?"All candidate image URLs failed":"No high-confidence image match"));
+  recordImageAudit(x,failed?"failed":"reconstruction",auditDetail);
   const src=fallbackSvg(x);
-  el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · '+(failed?"候选图片地址均加载失败":"尚未找到高置信度原图")+' · 点击继续考古</div>';
+  const statusText=failed?"候选图片地址均加载失败":(timedOut?"图片检索超时，已结束等待":"尚未找到高置信度原图");
+  el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · '+statusText+' · 点击继续考古</div>';
 }
 async function fillMedia(el,x){
   if(!el||el.dataset.loaded==="1"||el.dataset.pending==="1")return;
   el.dataset.pending="1";
-  let data=await commonsImage(x);
-  if(!data)data=await openverseImage(x);
-  if(!data)data=await sourcePageImage(x);
-  if(!el.isConnected)return;
-  el.dataset.pending="";
-  if(!data){renderMediaFallback(el,x);return}
-  el.classList.remove("media-loading");
-  const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
-  const credit=data.creditLabel||("🟢 "+(data.sourceType==="openverse"?"Openverse":"Wikimedia Commons")+" · "+(data.license||"许可见文件页"));
-  const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[]),data.original].filter((url,i,all)=>Boolean(url)&&all.indexOf(url)===i);
-  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img referrerpolicy="no-referrer" loading="lazy" decoding="async" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
-  const img=el.querySelector("img");
-  if(!img||!sources.length){renderMediaFallback(el,x,"failed");return}
-  let next=1;
-  img.onload=function(){
-    el.dataset.loaded="1";
-    recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
-  };
-  img.onerror=function(){
-    if(next<sources.length){img.src=sources[next++];return}
-    img.onerror=null;
-    renderMediaFallback(el,x,"failed");
-  };
-  img.src=sources[0];
+  let deadlineTimer=null;
+  let timedOut=false;
+  const deadlineMs=18000;
+  const lookup=(async()=>{
+    let data=await commonsImage(x);
+    if(timedOut)return null;
+    if(!data)data=await openverseImage(x);
+    if(timedOut)return null;
+    if(!data)data=await sourcePageImage(x);
+    return data;
+  })();
+  const deadline=new Promise(resolve=>{
+    deadlineTimer=setTimeout(()=>{
+      timedOut=true;
+      resolve({__imageLookupTimedOut:true});
+    },deadlineMs);
+  });
+  try{
+    const result=await Promise.race([lookup,deadline]);
+    if(!el.isConnected||el.dataset.loaded==="1")return;
+    if(result&&result.__imageLookupTimedOut){
+      renderMediaFallback(el,x,"timeout");
+      return;
+    }
+    const data=result;
+    if(!data){renderMediaFallback(el,x);return}
+    el.classList.remove("media-loading");
+    const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
+    const credit=data.creditLabel||("🟢 "+(data.sourceType==="openverse"?"Openverse":"Wikimedia Commons")+" · "+(data.license||"许可见文件页"));
+    const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[]),data.original].filter((url,i,all)=>Boolean(url)&&all.indexOf(url)===i);
+    el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img referrerpolicy="no-referrer" loading="lazy" decoding="async" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
+    const img=el.querySelector("img");
+    if(!img||!sources.length){renderMediaFallback(el,x,"failed");return}
+    let next=1;
+    img.onload=function(){
+      el.dataset.loaded="1";
+      el.dataset.pending="";
+      recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
+    };
+    img.onerror=function(){
+      if(next<sources.length){img.src=sources[next++];return}
+      img.onerror=null;
+      renderMediaFallback(el,x,"failed");
+    };
+    img.src=sources[0];
+  }catch(error){
+    if(el.isConnected&&el.dataset.loaded!=="1")renderMediaFallback(el,x,"failed");
+  }finally{
+    clearTimeout(deadlineTimer);
+    if(el.dataset.loaded!=="1")el.dataset.pending="";
+  }
 }
 
 const IMAGE_AUDIT_KEY="life-encyclopedia-image-audit-v1";
