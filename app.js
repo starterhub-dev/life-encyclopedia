@@ -6,7 +6,172 @@ let active="全部";
 const grid=document.querySelector("#grid"),input=document.querySelector("#searchInput"),nav=document.querySelector("#categories");
 
 function cls(c){return c==="极臭"?"extreme":c==="恶臭"?"stinky":c==="政治抽象"?"politics":c==="黑色幽默"?"black":c==="简中互联网"?"cn":c==="全球互联网"?"global":c==="历史地狱笑话"?"history":c==="互联网党争与蠢贼"?"war":"absurd"}
-const imageHints={"曼巴OUT":["Kobe Bryant Mamba Out meme"],"Man What Can I Say":["Kobe Bryant","Mamba Out"],"凌晨四点的洛杉矶梗":["Kobe Bryant 4 AM Los Angeles"],"牢大梗":["Kobe Bryant meme"],"科比相关互联网迷因":["Kobe Bryant meme"],"佐巴扬梗":["Kobe Bryant meme"],"苹果党 vs 安卓党":["iPhone Android meme"],"iPhone党 vs 安卓党":["iPhone Android meme"],"苹果安卓年度圣战":["iPhone Android meme"],"苹果党":["Apple fan Android meme"],"安卓党":["Android fan iPhone meme"],"折叠屏党争":["foldable phone meme"],"LCD永不为奴":["LCD screen meme"],"OLED党":["OLED smartphone meme"],"手机影像大战":["smartphone camera meme"],"华为 vs iPhone":["Huawei iPhone meme"],"电车党 vs 油车党":["electric car gasoline car meme"],"新能源 vs 燃油车":["electric car petrol car meme"],"电车没有灵魂梗":["electric car meme"],"油车祖传技术梗":["gasoline car meme"],"增程到底算不算电车":["range extender electric car meme"],"插混 vs 增程":["plug in hybrid range extender meme"],"纯电 vs 混动":["electric hybrid car meme"],"零百大战":["0-100 acceleration car meme"],"V8信仰":["V8 engine meme"],"冰箱彩电大沙发梗":["Chinese EV meme refrigerator TV sofa"],"汽车论坛祖传口水战":["car forum meme"],"真实蠢贼：作案后自拍":["dumb criminal selfie"],"真实蠢贼：留下身份证":["dumb criminal police evidence"],"真实蠢贼：留下手机号":["dumb criminal phone number"],"真实蠢贼：监控前露脸":["dumb criminal CCTV"],"真实蠢贼：偷车却不会开":["car thief meme"],"真实蠢贼：逃跑坐错车":["dumb criminal meme"],"真实蠢贼：网上出售赃物广告":["dumb criminal selling stolen goods"],"蠢贼新闻：最好的卧底是自己":["dumb criminal news"],"肘击王":["elbow meme basketball"],"饭桌肘击王":["elbow meme"],"地铁肘击王":["elbow meme"],"鸵鸟肘击":["ostrich elbow meme"],"肘击奶奶梗":["elbow meme"],"河南人偷井盖梗":["Henan manhole cover meme"],"偷井盖梗考古":["manhole cover meme China"],"井盖消失文学":["manhole cover meme"],"地域刻板印象梗":["regional stereotype meme China"],"历史地狱笑话":["history meme"],"路易十六：逛街摸不着头脑，最后真的掉脑袋":["Louis XVI guillotine meme"],"泰坦尼克号：冰山表示我不同意":["Titanic iceberg meme"],"拿破仑：Nothing we can do":["Napoleon nothing we can do meme"],"罗马帝国：我怎么天天被想起":["Roman Empire meme"],"凯撒：我只是去了一趟元老院":["Julius Caesar Senate meme"],"崔佛":["Trevor GTA meme"],"Rickroll":["Rickroll"],"Doge":["Doge meme"],"Wojak":["Wojak meme"],"GigaChad":["Gigachad meme"],"Polish Cow":["Polish Cow meme"],"Italian Brainrot":["Italian brainrot meme"],"Tralalero Tralala":["Tralalero Tralala"],"PPAP":["Pen Pineapple Apple Pen"],"Coffin Dance":["Coffin Dance"],"Ugandan Knuckles":["Ugandan Knuckles"],"Skibidi Toilet":["Skibidi Toilet meme"],"Ohio":["Ohio meme"],"Rizz":["Rizz meme"],"Gyatt":["Gyatt meme"],"Fanum Tax":["Fanum Tax meme"],"Surprised Pikachu":["Surprised Pikachu meme"],"This Is Fine":["This Is Fine meme"],"Distracted Boyfriend":["Distracted Boyfriend meme"],"Woman Yelling at Cat":["Woman Yelling at Cat meme"],"Drakeposting":["Drake Hotline Bling meme"],"My name is cow":["Polish Cow meme","Polish Cow","My name is cow meme"]};
+const imageHints={"曼巴OUT":["Kobe Bryant Mamba Out meme"],"Man What Can I Say":["Kobe Bryant","Mamba Out"],"凌晨四点的洛杉矶梗":["Kobe Bryant 4 AM Los Angeles"],"牢大梗":["Kobe Bryant meme"],"科比相关互联网迷因":["Kobe Bryant meme"],"佐巴扬梗":["Kobe Bryant meme"],"苹果党 vs 安卓党":["iPhone Android meme"],"iPhone党 vs 安卓党":["iPhone Android meme"],"苹果安卓年度圣战":["iPhone Android meme"],"苹果党":["Apple fan Android meme"],"安卓党":["Android fan iPhone meme"],"折叠屏党争":["foldable phone meme"],"LCD永不为奴":["LCD screen meme"],"OLED党":["OLED smartphone meme"],"手机影像大战":["smartphone camera meme"],"华为 vs iPhone":["Huawei iPhone meme"],"电车党 vs 油车党":["electric car gasoline car meme"],"新能源 vs 燃油车":["electric car petrol car meme"],"电车没有灵魂梗":["electric car meme"],"油车祖传技术梗":["gasoline car meme"],"增程到底算不算电车":["range extender electric car meme"],"插混 vs 增程":["plug in hybrid range extender meme"],"纯电 vs 混动":["electric hybrid car meme"],"零百大战":["0-100 acceleration car meme"],"V8信仰":["V8 engine meme"],"冰箱彩电大沙发梗":["Chinese EV meme refrigerator TV sofa"],"汽车论坛祖传口水战":["car forum meme"],"真实蠢贼：作案后自拍":["dumb criminal selfie"],"真实蠢贼：留下身份证":["dumb criminal police evidence"],"真实蠢贼：留下手机号":["dumb criminal phone number"],"真实蠢贼：监控前露脸":["dumb criminal CCTV"],"真实蠢贼：偷车却不会开":["car thief meme"],"真实蠢贼：逃跑坐错车":["dumb criminal meme"],"真实蠢贼：网上出售赃物广告":["dumb criminal selling stolen goods"],"蠢贼新闻：最好的卧底是自己":["dumb criminal news"],"肘击王":["elbow meme basketball"],"饭桌肘击王":["elbow meme"],"地铁肘击王":["elbow meme"],"鸵鸟肘击":["ostrich elbow meme"],"肘击奶奶梗":["elbow meme"],"河南人偷井盖梗":["Henan manhole cover meme"],"偷井盖梗考古":["manhole cover meme China"],"井盖消失文学":["manhole cover meme"],"地域刻板印象梗":["regional stereotype meme China"],"历史地狱笑话":["history meme"],"路易十六：逛街摸不着头脑，最后真的掉脑袋":["Louis XVI guillotine meme"],"泰坦尼克号：冰山表示我不同意":["Titanic iceberg meme"],"拿破仑：Nothing we can do":["Napoleon nothing we can do meme"],"罗马帝国：我怎么天天被想起":["Roman Empire meme"],"凯撒：我只是去了一趟元老院":["Julius Caesar Senate meme"],"崔佛":["Trevor GTA meme"],"Rickroll":["Rickroll"],"Doge":["Doge meme"],"Wojak":["Wojak meme"],"GigaChad":["Gigachad meme"],"Polish Cow":["Polish Cow meme"],"Italian Brainrot":["Italian brainrot meme"],"Tralalero Tralala":["Tralalero Tralala"],"PPAP":["Pen Pineapple Apple Pen"],"Coffin Dance":["Coffin Dance"],"Ugandan Knuckles":["Ugandan Knuckles"],"Skibidi Toilet":["Skibidi Toilet meme"],"Ohio":["Ohio meme"],"Rizz":["Rizz meme"],"Gyatt":["Gyatt meme"],"Fanum Tax":["Fanum Tax meme"],"Surprised Pikachu":["Surprised Pikachu meme"],"This Is Fine":["This Is Fine meme"],"Distracted Boyfriend":["Distracted Boyfriend meme"],"Woman Yelling at Cat":["Woman Yelling at Cat meme"],"Drakeposting":["Drake Hotline Bling meme"],"My name is cow":[]};
+
+const curatedImageOverrides={
+  "孙笑川“打奶奶”":{
+    thumb:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20181226/5d929b5e651543fab86aa81ebec7618b.jpeg",
+    fallbacks:["https://img.jinghooo.com/Fr-kfIpmO7yDl_JZLTpobMxUgbkG.png"],
+    original:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20181226/5d929b5e651543fab86aa81ebec7618b.jpeg",
+    page:"https://www.sohu.com/a/284627947_119079",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"孙笑川相关迷因肖像 · 非“打奶奶”事件证据"
+  },
+  "东百往事：沈阳大街":{
+    thumb:"https://src.shuaigetu.net/uploads/img1/20251018/936fd44ba79134eb381c1c46dcf0c3d9.jpg",
+    original:"https://src.shuaigetu.net/uploads/img1/20251018/936fd44ba79134eb381c1c46dcf0c3d9.jpg",
+    page:"https://www.shuaigetu.net/biaoqing/20899.html",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"东百往事虎哥、刀哥相关图 · 来源页"
+  },
+  "只因你太美":{
+    thumb:"https://i2.hdslb.com/bfs/archive/c331d455e7d08115d85afd0cafb7733bba159034.jpg",
+    original:"https://i2.hdslb.com/bfs/archive/c331d455e7d08115d85afd0cafb7733bba159034.jpg",
+    page:"https://www.bilibili.com/video/av47831182/",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"蔡徐坤“鸡你太美”相关视频封面 · 来源页"
+  },
+  "华强买瓜":{
+    thumb:"https://otomad.wiki/images/4/4c/%E8%BF%99%E7%93%9C%E4%BF%9D%E7%86%9F%E5%90%97.png",
+    fallbacks:["https://m.iqiyipic.com/u4/image/20230527/49/ef/pv_7337912364304200_d_601_1080_608.jpg"],
+    original:"https://otomad.wiki/images/4/4c/%E8%BF%99%E7%93%9C%E4%BF%9D%E7%86%9F%E5%90%97.png",
+    page:"https://otomad.wiki/%E5%88%98%E5%8D%8E%E5%BC%BA%E4%B9%B0%E7%93%9C",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"刘华强买瓜名场面 · 来源页"
+  },
+  "新宝岛":{
+    thumb:"https://rockinon.com/images/entry/width%3A750/131304/1",
+    original:"https://rockinon.com/images/entry/width%3A750/131304/1",
+    page:"https://rockinon.com/news/detail/131304.amp",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"サカナクション《新宝島》MV相关图 · 来源页"
+  }
+};
+function curatedImageFor(x){
+  if(curatedImageOverrides[x.t])return curatedImageOverrides[x.t];
+  const text=String((x.t||"")+" "+(x.q||"")+" "+(x.s||"")+" "+(x.n||"")).toLowerCase();
+  if(/孙笑川|孙狗|狗粉丝|嗨粉|带带大师兄|6324|网恋教父|假孙笑川|孙笑川258|抽象话/.test(text)){
+    const d=curatedImageOverrides["孙笑川“打奶奶”"];
+    return {...d,creditLabel:"孙笑川相关迷因肖像 · 主题关联图（非具体事件证据）"};
+  }
+  if(/东百往事|沈阳大街|东北虎哥|虎哥|刀哥|杀马特团长|好果汁吃/.test(text))return curatedImageOverrides["东百往事：沈阳大街"];
+  if(/华强买瓜|刘华强|这瓜保熟|瓜保熟吗/.test(text))return curatedImageOverrides["华强买瓜"];
+  if(/只因你太美|鸡你太美|蔡徐坤/.test(text))return curatedImageOverrides["只因你太美"];
+  if(/新宝岛|shin takara.?jima/.test(text))return curatedImageOverrides["新宝岛"];
+  return null;
+}
+const sourceUrlCounts=new Map();
+items.forEach(x=>{if(x.u)sourceUrlCounts.set(x.u,(sourceUrlCounts.get(x.u)||0)+1)});
+const SOURCE_IMAGE_CACHE_KEY="life-encyclopedia-source-images-v1";
+const sourceImageCache=new Map(),sourceImagePending=new Map();
+let sourceImageSaved=null,activeSourceImageRequests=0;
+const sourceImageQueue=[];
+function savedSourceImages(){
+  if(sourceImageSaved)return sourceImageSaved;
+  try{sourceImageSaved=JSON.parse(localStorage.getItem(SOURCE_IMAGE_CACHE_KEY)||"{}")}catch(e){sourceImageSaved={}}
+  return sourceImageSaved;
+}
+function saveSourcePageImage(url,data){
+  try{
+    const cache=savedSourceImages();
+    cache[url]={at:Date.now(),data};
+    const entries=Object.entries(cache).sort((a,b)=>(a[1].at||0)-(b[1].at||0));
+    while(entries.length>120){const old=entries.shift();delete cache[old[0]]}
+    localStorage.setItem(SOURCE_IMAGE_CACHE_KEY,JSON.stringify(cache));
+    sourceImageSaved=cache;
+  }catch(e){}
+}
+function enqueueSourceImageRequest(task){
+  return new Promise((resolve,reject)=>{
+    sourceImageQueue.push({task,resolve,reject});
+    drainSourceImageQueue();
+  });
+}
+function drainSourceImageQueue(){
+  while(activeSourceImageRequests<2&&sourceImageQueue.length){
+    const job=sourceImageQueue.shift();
+    activeSourceImageRequests++;
+    Promise.resolve().then(job.task).then(job.resolve,job.reject).finally(()=>{
+      activeSourceImageRequests--;
+      drainSourceImageQueue();
+    });
+  }
+}
+function canUseSourcePageImage(x){
+  if(!x||!x.u||(sourceUrlCounts.get(x.u)||0)>3)return false;
+  try{
+    const u=new URL(x.u),host=u.hostname.toLowerCase(),path=u.pathname.toLowerCase();
+    if(!/^https?:$/.test(u.protocol))return false;
+    if(host==="tieba.baidu.com")return false;
+    if((host==="knowyourmeme.com"||host==="www.knowyourmeme.com")&&path==="/")return false;
+    if((host==="bilibili.com"||host==="www.bilibili.com")&&/\/video\/bv1z7411d779/.test(path))return false;
+    if((host==="reddit.com"||host==="www.reddit.com")&&/\/r\/askreddit\/comments\/5m3737/.test(path))return false;
+    if(path==="/"&&!u.search)return false;
+    return true;
+  }catch(e){return false}
+}
+function extractSourcePageImage(markdown,x){
+  const candidates=[];
+  const re=/!\[([^\]]{0,240})\]\(\s*(https?:\/\/[^)\s]+)(?:\s+["'][^)]*["'])?\s*\)/gi;
+  let m,index=0;
+  while((m=re.exec(markdown))!==null){
+    const alt=String(m[1]||"").replace(/&amp;/g,"&").trim();
+    const url=String(m[2]||"").replace(/&amp;/g,"&").replace(/\\\)/g,")");
+    if(!/^https?:\/\//i.test(url)||/^(data|blob):/i.test(url))continue;
+    const joined=(alt+" "+url).toLowerCase();
+    if(/favicon|logo|sprite|tracking|pixel|spacer|blank\.gif|qrcode|qr-code|wechat-qr|\/badge/.test(joined))continue;
+    let score=16-index;
+    const title=String(x.t||"").normalize("NFKC").toLowerCase().replace(/[^\u3400-\u9fffa-z0-9]/g,"");
+    const target=String(alt+" "+url).normalize("NFKC").toLowerCase().replace(/[^\u3400-\u9fffa-z0-9]/g,"");
+    if(title.length>=3&&target.includes(title))score+=30;
+    const tokens=(String(x.t||"")+" "+String(x.q||"")).toLowerCase().match(/[a-z0-9]{3,}|[\u3400-\u9fff]{2,}/g)||[];
+    for(const token of tokens){if(token.length>=3&&target.includes(token))score+=5}
+    candidates.push({url,alt,score,index:index++});
+  }
+  if(!candidates.length)return null;
+  candidates.sort((a,b)=>b.score-a.score||a.index-b.index);
+  const best=candidates[0];
+  return {
+    thumb:best.url,original:best.url,page:x.u,title:best.alt||x.t,
+    license:"来源页面许可未核实",
+    creditLabel:"来源页面配图 · 请查阅原页面授权说明",
+    sourceType:"source-page"
+  };
+}
+async function sourcePageImage(x){
+  if(!canUseSourcePageImage(x))return null;
+  const key=x.u;
+  if(sourceImageCache.has(key))return sourceImageCache.get(key);
+  if(sourceImagePending.has(key))return sourceImagePending.get(key);
+  const saved=savedSourceImages()[key];
+  if(saved&&Date.now()-(saved.at||0)<7*24*60*60*1000&&saved.data){
+    sourceImageCache.set(key,saved.data);
+    return saved.data;
+  }
+  const promise=(async()=>{
+    try{
+      const endpoint="https://r.jina.ai/"+x.u;
+      const markdown=await enqueueSourceImageRequest(async()=>{
+        const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),10000);
+        try{
+          const response=await fetch(endpoint,{headers:{Accept:"text/plain"},signal:controller.signal});
+          if(!response.ok)throw new Error("Reader HTTP "+response.status);
+          return await response.text();
+        }finally{clearTimeout(timeout)}
+      });
+      const data=extractSourcePageImage(markdown,x);
+      sourceImageCache.set(key,data);
+      if(data)saveSourcePageImage(key,data);
+      return data;
+    }catch(e){
+      sourceImageCache.set(key,null);
+      return null;
+    }finally{sourceImagePending.delete(key)}
+  })();
+  sourceImagePending.set(key,promise);
+  return promise;
+}
+
 const imageCache=new Map(),imagePending=new Map();
 function normalizeSearch(v){return String(v||"").replace(/[“”"'：:（）()【】\[\]！？!?，,。·]/g," ").replace(/\s+/g," ").trim()}
 function imageQueryVariants(x){
@@ -49,39 +214,79 @@ async function commonsSearch(variant,x){
   const p=pages[0],info=p&&p.imageinfo&&p.imageinfo[0];
   if(!p||!info||!info.url)return null;
   const score=scoreCandidate(p,variant,x);
-  if(score<12)return null;
+  if(score<18)return null;
   const meta=info.extmetadata||{};
   const license=(meta.LicenseShortName&&meta.LicenseShortName.value)||"许可证见文件页";
   return {thumb:info.thumburl||info.url,original:info.url,page:"https://commons.wikimedia.org/wiki/File:"+encodeURIComponent((p.title||"").replace(/^File:/,"")).replace(/%2F/g,"/"),title:(p.title||"").replace(/^File:/,""),license,artist:(meta.Artist&&meta.Artist.value)||"",query:variant,confidence:score};
 }
+
 async function commonsImage(x){
-  const key=x.t+"|"+x.q;if(imageCache.has(key))return imageCache.get(key);if(imagePending.has(key))return imagePending.get(key);
+  const key=x.t+"|"+x.q;
+  if(imageCache.has(key))return imageCache.get(key);
+  if(imagePending.has(key))return imagePending.get(key);
+  const curated=curatedImageFor(x);
+  if(curated){imageCache.set(key,curated);return curated}
   const promise=(async()=>{try{
-    const variants=imageQueryVariants(x);if(!variants.length){imageCache.set(key,null);return null}
+    const variants=imageQueryVariants(x);
+    if(!variants.length){imageCache.set(key,null);return null}
     const ranked=[];
     for(const v of variants){
-      const data=await commonsSearch(v,x);
+      let data=null;
+      try{data=await commonsSearch(v,x)}catch(e){}
       if(data)ranked.push({data,score:scoreCandidate(data,v,x)});
     }
     ranked.sort((a,b)=>b.score-a.score);
     const best=ranked[0];
-    if(best&&best.score>=12){imageCache.set(key,best.data);return best.data}
+    if(best&&best.score>=18){imageCache.set(key,best.data);return best.data}
     imageCache.set(key,null);return null;
   }catch(e){imageCache.set(key,null);return null}finally{imagePending.delete(key)}})();
-  imagePending.set(key,promise);return promise;
+  imagePending.set(key,promise);
+  return promise;
 }
+
 function mediaHtml(i,kind){const k=kind||"card";const box=k==="detail"?"detail-media":"media";return '<div class="'+box+' media-loading" data-media="'+i+'"><div class="media-placeholder">🖼️ 图片考古中…</div></div>'}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
 function fallbackSvg(x){
-  const title=esc(x.t).slice(0,48),quote=esc(x.q).slice(0,82),cat=esc(x.c);
+  const safe=v=>String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&apos;");
+  const title=safe(x.t).slice(0,48),quote=safe(x.q).slice(0,82),cat=safe(x.c);
   const palettes={"极臭":["#ff7a45","#2b1510"],"恶臭":["#d6a34a","#241c0f"],"逆天发言":["#6fe6ff","#10252b"],"政治抽象":["#c79cff","#20162b"],"黑色幽默":["#d9d9d9","#1c1c1c"],"简中互联网":["#b9ef6d","#182414"],"全球互联网":["#73c8ff","#11202a"],"历史地狱笑话":["#e6c16d","#282014"],"互联网党争与蠢贼":["#ff9b9b","#281417"]};
   const p=palettes[x.c]||["#b8ff4a","#172014"];
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="'+p[1]+'"/><stop offset="1" stop-color="#0d1015"/></linearGradient></defs><rect width="900" height="520" fill="url(#g)"/><circle cx="760" cy="92" r="58" fill="'+p[0]+'" opacity=".12"/><path d="M420 155c-58 0-86 42-76 82-28 6-48 30-48 58 0 37 31 66 70 66h140c39 0 70-29 70-66 0-28-20-52-48-58 10-40-18-82-76-82-8-24-23-36-46-36-23 0-38 12-46 36z" fill="#8d4f2e" stroke="'+p[0]+'" stroke-width="6"/><path d="M374 229h42M484 229h42" stroke="#17100d" stroke-width="12" stroke-linecap="round"/><path d="M425 264q25 20 50 0" fill="none" stroke="#17100d" stroke-width="8" stroke-linecap="round"/><text x="48" y="62" fill="'+p[0]+'" font-family="system-ui,sans-serif" font-size="18" font-weight="800" letter-spacing="3">MUSEUM RECONSTRUCTION</text><text x="48" y="108" fill="#f4f6f8" font-family="system-ui,sans-serif" font-size="30" font-weight="800">'+title.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</text><text x="48" y="450" fill="#aeb6c2" font-family="system-ui,sans-serif" font-size="18">'+quote.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+'</text><text x="48" y="482" fill="#68717e" font-family="system-ui,sans-serif" font-size="14">'+cat.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+' · 无可靠原始图片时的馆藏复原图</text></svg>';
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="'+p[1]+'"/><stop offset="1" stop-color="#0d1015"/></linearGradient><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#fff" stroke-opacity=".05"/></pattern></defs><rect width="900" height="520" fill="url(#g)"/><rect width="900" height="520" fill="url(#grid)"/><circle cx="730" cy="185" r="112" fill="none" stroke="'+p[0]+'" stroke-width="3" opacity=".65"/><circle cx="730" cy="185" r="70" fill="'+p[0]+'" opacity=".12"/><rect x="286" y="142" width="328" height="218" rx="22" fill="#0d1015" fill-opacity=".55" stroke="'+p[0]+'" stroke-width="5"/><path d="M324 315l80-82 65 62 46-42 62 62" fill="none" stroke="'+p[0]+'" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="536" cy="192" r="17" fill="'+p[0]+'"/><text x="48" y="62" fill="'+p[0]+'" font-family="system-ui,sans-serif" font-size="18" font-weight="800" letter-spacing="3">MUSEUM RECONSTRUCTION</text><text x="48" y="108" fill="#f4f6f8" font-family="system-ui,sans-serif" font-size="30" font-weight="800">'+title+'</text><text x="48" y="450" fill="#aeb6c2" font-family="system-ui,sans-serif" font-size="18">'+quote+'</text><text x="48" y="482" fill="#68717e" font-family="system-ui,sans-serif" font-size="14">'+cat+' · 非原始梗图，尚未找到可靠匹配</text></svg>';
   return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
 }
-async function fillMedia(el,x){if(!el||el.dataset.loaded)return;const data=await commonsImage(x);if(!el.isConnected)return;el.dataset.loaded="1";el.classList.remove("media-loading");
-  if(!data){const src=fallbackSvg(x);el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 馆藏复原图 · 暂无足够可信的原始图片匹配 · 点击可继续考古</div>';return}
-  el.innerHTML='<a class="media-link" href="'+data.original+'" target="_blank" rel="noopener"><img loading="lazy" src="'+data.thumb+'" alt="'+esc(x.t)+'"></a><div class="media-credit">🟢 原图匹配 · Wikimedia Commons · '+esc(data.license)+'</div>'}
+function renderMediaFallback(el,x){
+  el.dataset.loaded="1";
+  el.dataset.pending="";
+  el.classList.remove("media-loading");
+  const src=fallbackSvg(x);
+  el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · 尚未找到可验证的原始梗图 · 点击继续考古</div>';
+}
+async function fillMedia(el,x){
+  if(!el||el.dataset.loaded==="1"||el.dataset.pending==="1")return;
+  el.dataset.pending="1";
+  let data=await commonsImage(x);
+  if(!data)data=await sourcePageImage(x);
+  if(!el.isConnected)return;
+  el.dataset.pending="";
+  if(!data){renderMediaFallback(el,x);return}
+  el.dataset.loaded="1";
+  el.classList.remove("media-loading");
+  const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
+  const credit=data.creditLabel||("🟢 原图匹配 · Wikimedia Commons · "+(data.license||"许可见文件页"));
+  const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[])].filter(Boolean);
+  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="'+esc(sources[0]||data.original||"")+'" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
+  const img=el.querySelector("img");
+  if(img){
+    let next=1;
+    img.onerror=function(){
+      if(next<sources.length){img.src=sources[next++];return}
+      img.onerror=null;
+      renderMediaFallback(el,x);
+    };
+  }
+}
+
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
   const io=new IntersectionObserver(entries=>{entries.filter(e=>e.isIntersecting).forEach(e=>{const el=e.target;io.unobserve(el);fillMedia(el,items[Number(el.dataset.media)])})},{rootMargin:"700px"});els.forEach(el=>io.observe(el))}
 const FAVORITES_KEY="internet-trash-favorites";
