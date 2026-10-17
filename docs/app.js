@@ -171,9 +171,13 @@ function enqueueImageRequest(task){
 async function commonsSearch(variant,x){
   const url="https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrsearch="+encodeURIComponent(variant)+"&gsrnamespace=6&gsrlimit=8&prop=imageinfo|categories&iiprop=url|mime|size|thumburl|extmetadata&iiurlwidth=900&cllimit=10&format=json&origin=*";
   const j=await enqueueImageRequest(async()=>{
-    const r=await fetch(url,{headers:{Accept:"application/json"}});
-    if(!r.ok)throw new Error("HTTP "+r.status);
-    return r.json();
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),8000);
+    try{
+      const r=await fetch(url,{headers:{Accept:"application/json"},signal:controller.signal});
+      if(!r.ok)throw new Error("HTTP "+r.status);
+      return await r.json();
+    }finally{clearTimeout(timeout)}
   });
   const pages=j.query&&j.query.pages?Object.values(j.query.pages):[];
   const results=pages.map(p=>{
@@ -216,7 +220,7 @@ async function commonsImage(x){
         if(candidate&&(!best||candidate.score>best.score))best=candidate;
         if(best&&best.score>=16)break;
       }
-      const match=best&&best.score>=6?best:null;
+      const match=best&&best.score>=8?best:null;
       imageCache.set(key,match);
       return match;
     }catch(e){
@@ -270,13 +274,14 @@ function posterSvgUri(x){
     '</svg>';
   return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
 }
-function showPosterMedia(el,x){
+function showPosterMedia(el,x,finalize=true){
   if(!el)return;
-  el.dataset.loaded="1";
+  if(finalize)el.dataset.loaded="1";else delete el.dataset.loaded;
   el.dataset.poster="1";
   el.classList.remove("media-loading");
   const href=x.u||"https://knowyourmeme.com/categories/meme";
-  el.innerHTML='<a class="media-link" href="'+esc(href)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(posterSvgUri(x))+'" alt="'+esc(x.t)+' 的馆藏主题海报"></a><div class="media-credit">馆藏主题海报 · 自动生成（未找到可验证的原始梗图）</div>';
+  const credit=finalize?"馆藏主题海报 · 自动生成（未找到可验证的原始梗图）":"展品专属主题海报 · 正在核验原图";
+  el.innerHTML='<a class="media-link" href="'+esc(href)+'" target="_blank" rel="noopener"><img loading="lazy" src="'+esc(posterSvgUri(x))+'" alt="'+esc(x.t)+' 的馆藏主题海报"></a><div class="media-credit">'+credit+'</div>';
 }
 function showMatchedMedia(el,x,data,onFallback){
   if(!el)return;
@@ -296,10 +301,13 @@ function showMatchedMedia(el,x,data,onFallback){
 function mediaHtml(i,kind){const k=kind||"card";const box=k==="detail"?"detail-media":"media";return '<div class="'+box+' media-loading" data-media="'+i+'"><div class="media-placeholder">🖼️ 图片考古中…</div></div>'}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
 async function fillMedia(el,x){
-  if(!el||el.dataset.loaded)return;
+  if(!el||el.dataset.loaded==="1"||el.dataset.pending==="1")return;
+  el.dataset.pending="1";
+  showPosterMedia(el,x,false);
   const data=await commonsImage(x);
   if(!el.isConnected)return;
-  if(!data){showPosterMedia(el,x);return}
+  delete el.dataset.pending;
+  if(!data){showPosterMedia(el,x,true);return}
   showMatchedMedia(el,x,data);
 }
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
@@ -330,8 +338,11 @@ async function detail(x,pushUrl=true){
   document.querySelector("#favBtn").onclick=()=>{const on=setFavorite(x,!isFavorite(x));document.querySelector("#favBtn").classList.toggle("on",on);document.querySelector("#favBtn").textContent=on?"★ 已收藏":"☆ 收藏";render()};
   document.querySelector("#shareBtn").onclick=()=>shareItem(x);
   const media=document.querySelector('#detailContent [data-media]'),metaBox=document.querySelector("#imageMeta");
-  const data=await commonsImage(x);
   if(!media||!metaBox)return;
+  showPosterMedia(media,x,false);
+  metaBox.textContent="先显示展品专属主题海报，正在核验是否存在可信原图。";
+  const data=await commonsImage(x);
+  if(!media.isConnected)return;
   if(!data){
     showPosterMedia(media,x);
     metaBox.textContent="没有找到达到相关性阈值的原始图片，已生成这条展品专属的主题海报。";
