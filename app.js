@@ -240,30 +240,30 @@ function canUseSourcePageImage(x){
 function extractSourcePageImage(markdown,x){
   const candidates=[];
   const re=/!\[([^\]]{0,240})\]\(\s*(https?:\/\/[^)\s]+)(?:\s+["'][^)]*["'])?\s*\)/gi;
+  const clean=v=>String(v||"").normalize("NFKC").toLowerCase().replace(/&amp;/g,"&").replace(/[^\u3400-\u9fffa-z0-9]/g,"");
+  const title=clean(x.t), quote=clean(x.q);
+  const tokens=[...new Set(((String(x.t||"")+" "+String(x.q||"")).toLowerCase().match(/[a-z0-9]{4,}|[\u3400-\u9fff]{3,}/g)||[]).map(clean).filter(t=>t.length>=3))];
   let m,index=0;
   while((m=re.exec(markdown))!==null){
     const alt=String(m[1]||"").replace(/&amp;/g,"&").trim();
     const url=String(m[2]||"").replace(/&amp;/g,"&").replace(/\\\)/g,")");
     if(!/^https?:\/\//i.test(url)||/^(data|blob):/i.test(url))continue;
     const joined=(alt+" "+url).toLowerCase();
-    if(/favicon|logo|sprite|tracking|pixel|spacer|blank\.gif|qrcode|qr-code|wechat-qr|\/badge/.test(joined))continue;
-    let score=16-index;
-    const title=String(x.t||"").normalize("NFKC").toLowerCase().replace(/[^\u3400-\u9fffa-z0-9]/g,"");
-    const target=String(alt+" "+url).normalize("NFKC").toLowerCase().replace(/[^\u3400-\u9fffa-z0-9]/g,"");
-    if(title.length>=3&&target.includes(title))score+=30;
-    const tokens=(String(x.t||"")+" "+String(x.q||"")).toLowerCase().match(/[a-z0-9]{3,}|[\u3400-\u9fff]{2,}/g)||[];
-    for(const token of tokens){if(token.length>=3&&target.includes(token))score+=5}
+    if(/favicon|logo|sprite|tracking|pixel|spacer|blank\.gif|qrcode|qr-code|wechat-qr|\/badge|avatar|profile|placeholder|default-image/.test(joined))continue;
+    const target=clean(alt+" "+url);
+    let score=0,matched=0;
+    if(title.length>=3&&target.includes(title))score+=60;
+    if(quote.length>=5&&target.includes(quote))score+=25;
+    for(const token of tokens){if(target.includes(token)){score+=8;matched++}}
+    const minimumMatches=tokens.length>=3?2:1;
+    if(score<16||matched<minimumMatches){index++;continue}
+    score-=index;
     candidates.push({url,alt,score,index:index++});
   }
   if(!candidates.length)return null;
   candidates.sort((a,b)=>b.score-a.score||a.index-b.index);
   const best=candidates[0];
-  return {
-    thumb:best.url,original:best.url,page:x.u,title:best.alt||x.t,
-    license:"来源页面许可未核实",
-    creditLabel:"来源页面配图 · 请查阅原页面授权说明",
-    sourceType:"source-page"
-  };
+  return {thumb:best.url,original:best.url,page:x.u,title:best.alt||x.t,license:"来源页面许可未核实",creditLabel:"来源页匹配配图 · 相关性检查通过，请查阅原页面授权说明",sourceType:"source-page",confidence:best.score};
 }
 async function sourcePageImage(x){
   if(!canUseSourcePageImage(x))return null;
@@ -305,13 +305,22 @@ function imageQueryVariants(x){
   const t=normalizeSearch(x.t), q=normalizeSearch(x.q);
   const base=imageHints[x.t]||null;
   if(base)return [...new Set(base)];
-  if(/真实蠢贼|蠢贼新闻|地域黑|偷井盖|河南人/.test(x.t))return [];
-  const cat=x.c==="全球互联网"?"meme":x.c==="历史地狱笑话"?"history meme":x.c==="互联网党争与蠢贼"?"meme":"";
   const variants=[];
+  const categoryTerms={
+    "全球互联网":["internet meme","reaction image"],
+    "历史地狱笑话":["history meme","historical meme"],
+    "简中互联网":["Chinese internet meme","Chinese reaction image"],
+    "政治抽象":["Chinese internet meme","reaction image"],
+    "黑色幽默":["dark humor meme","reaction image"],
+    "逆天发言":["reaction meme","internet meme"],
+    "互联网党争与蠢贼":["internet meme","news meme"]
+  }[x.c]||["internet meme"];
   if(t)variants.push(t);
   if(q&&q!==t)variants.push(q);
-  if(cat)variants.push(t+" "+cat);
-  return [...new Set(variants)].slice(0,3);
+  for(const term of categoryTerms)if(t)variants.push(t+" "+term);
+  const sourceLabel=String(x.s||"").split(/[·|—-]/)[0].trim();
+  if(t&&sourceLabel&&sourceLabel.length<36&&!/reddit|b站|bilibili|knowyourmeme/i.test(sourceLabel))variants.push(t+" "+sourceLabel);
+  return [...new Set(variants.filter(Boolean))].slice(0,5);
 }
 function scoreCandidate(page,variant,x){
   const title=normalizeSearch(page.title||"").toLowerCase();
@@ -386,6 +395,7 @@ function renderMediaFallback(el,x){
   el.dataset.loaded="1";
   el.dataset.pending="";
   el.classList.remove("media-loading");
+  recordImageAudit(x,"reconstruction","No high-confidence image match");
   const src=fallbackSvg(x);
   el.innerHTML='<a class="media-link museum-fallback" href="https://commons.wikimedia.org/w/index.php?search='+encodeURIComponent(x.t)+'&title=Special:MediaSearch&type=image" target="_blank" rel="noopener"><img src="'+src+'" alt="'+esc(x.t)+' · 馆藏复原图"></a><div class="media-credit">🟡 复原展签 · 尚未找到可验证的原始梗图 · 点击继续考古</div>';
 }
@@ -399,6 +409,7 @@ async function fillMedia(el,x){
   if(!data){renderMediaFallback(el,x);return}
   el.dataset.loaded="1";
   el.classList.remove("media-loading");
+  recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
   const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
   const credit=data.creditLabel||("🟢 原图匹配 · Wikimedia Commons · "+(data.license||"许可见文件页"));
   const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[])].filter(Boolean);
@@ -409,11 +420,29 @@ async function fillMedia(el,x){
     img.onerror=function(){
       if(next<sources.length){img.src=sources[next++];return}
       img.onerror=null;
+      recordImageAudit(x,"failed","All candidate image URLs failed");
       renderMediaFallback(el,x);
     };
   }
 }
 
+const IMAGE_AUDIT_KEY="life-encyclopedia-image-audit-v1";
+function recordImageAudit(x,status,detail){
+  try{
+    const old=JSON.parse(localStorage.getItem(IMAGE_AUDIT_KEY)||"{}");
+    const key=String(x.t||"")+"|"+String(x.q||"");
+    old[key]={title:x.t||"",query:x.q||"",source:x.u||"",status,detail:detail||"",at:Date.now()};
+    const entries=Object.entries(old);
+    while(entries.length>2200)entries.shift();
+    localStorage.setItem(IMAGE_AUDIT_KEY,JSON.stringify(Object.fromEntries(entries)));
+  }catch(e){}
+}
+window.getMuseumImageAudit=function(){
+  try{
+    const rows=Object.values(JSON.parse(localStorage.getItem(IMAGE_AUDIT_KEY)||"{}"));
+    return {total:rows.length,loaded:rows.filter(x=>x.status==="loaded").length,reconstruction:rows.filter(x=>x.status==="reconstruction").length,failed:rows.filter(x=>x.status==="failed").length,items:rows};
+  }catch(e){return {total:0,loaded:0,reconstruction:0,failed:0,items:[]}}
+};
 function observeMedia(){const els=[...document.querySelectorAll("[data-media]")];if(!els.length)return;if(!("IntersectionObserver" in window)){els.slice(0,18).forEach(el=>fillMedia(el,items[Number(el.dataset.media)]));return}
   const io=new IntersectionObserver(entries=>{entries.filter(e=>e.isIntersecting).forEach(e=>{const el=e.target;io.unobserve(el);fillMedia(el,items[Number(el.dataset.media)])})},{rootMargin:"700px"});els.forEach(el=>io.observe(el))}
 const FAVORITES_KEY="internet-trash-favorites";
