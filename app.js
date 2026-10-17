@@ -265,6 +265,113 @@ function extractSourcePageImage(markdown,x){
   const best=candidates[0];
   return {thumb:best.url,original:best.url,page:x.u,title:best.alt||x.t,license:"来源页面许可未核实",creditLabel:"来源页匹配配图 · 相关性检查通过，请查阅原页面授权说明",sourceType:"source-page",confidence:best.score};
 }
+const OPENVERSE_CACHE_KEY="life-encyclopedia-openverse-cache-v1";
+let openverseSaved=null;
+function readOpenverseCache(){
+  if(openverseSaved)return openverseSaved;
+  try{openverseSaved=JSON.parse(localStorage.getItem(OPENVERSE_CACHE_KEY)||"{}")}catch(e){openverseSaved={}}
+  return openverseSaved;
+}
+function writeOpenverseCache(key,data){
+  try{
+    const cache=readOpenverseCache();
+    cache[key]={at:Date.now(),data};
+    const entries=Object.entries(cache).sort((a,b)=>(a[1].at||0)-(b[1].at||0));
+    while(entries.length>700){const old=entries.shift();delete cache[old[0]]}
+    localStorage.setItem(OPENVERSE_CACHE_KEY,JSON.stringify(cache));
+    openverseSaved=cache;
+  }catch(e){}
+}
+function openverseTerms(x){
+  const title=String(x.t||"").trim(),quote=String(x.q||"").trim();
+  const clean=s=>s.toLowerCase().normalize("NFKC").replace(/[^\u3400-\u9fffa-z0-9]/g,"");
+  const terms=[];
+  if(title.length>=2)terms.push(title);
+  if(quote.length>=4&&clean(quote)!==clean(title)&&quote.length<=100)terms.push(quote);
+  if(/[A-Za-z]/.test(title)&&!/meme/i.test(title))terms.push(title+" meme");
+  return [...new Set(terms)].slice(0,2);
+}
+function openverseScore(result,x,query){
+  const clean=s=>String(s||"").normalize("NFKC").toLowerCase().replace(/[^\u3400-\u9fffa-z0-9]/g,"");
+  const title=String(result.title||"");
+  const tags=Array.isArray(result.tags)?result.tags.map(t=>typeof t==="string"?t:(t.name||t.title||"")).join(" "):"";
+  const text=clean(title+" "+tags+" "+(result.description||"")+" "+(result.attribution||"")+" "+(result.creator||""));
+  const target=clean(x.t||"");
+  const quote=clean(x.q||"");
+  let score=0,latinHits=0,cjkHits=0;
+  if(target.length>=3&&clean(title).includes(target))score+=30;
+  else if(target.length>=3&&text.includes(target))score+=22;
+  if(quote.length>=5&&text.includes(quote))score+=16;
+  const latin=[...new Set(((String(x.t||"")+" "+String(x.q||"")+" "+String(query||"")).toLowerCase().match(/[a-z0-9]{3,}/g)||[]))].filter(t=>!["the","and","for","you","are","this","that","with","from","meme","internet","image","images","photo","picture"].includes(t));
+  for(const token of latin){if(clean(title).includes(token)){score+=6;latinHits++}else if(text.includes(token)){score+=3;latinHits++}}
+  const cjk=clean(String(x.t||"")+" "+String(x.q||"")).match(/[\u3400-\u9fff]{2,}/g)||[];
+  const grams=new Set();
+  for(const block of cjk){for(let n=2;n<=Math.min(4,block.length);n++)for(let i=0;i<=block.length-n;i++)grams.add(block.slice(i,i+n))}
+  for(const gram of grams){if(text.includes(gram)){score+=2;cjkHits++}}
+  const exact=target.length>=3&&text.includes(target);
+  const relevant=exact||latinHits>=1||cjkHits>=2;
+  return {score,relevant,latinHits,cjkHits,exact,title};
+}
+async function openverseSearch(query,x){
+  const url="https://api.openverse.org/v1/images/?q="+encodeURIComponent(query)+"&page_size=20&filter_dead=true&license_type=all-cc";
+  return enqueueSourceImageRequest(async()=>{
+    const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),9000);
+    try{
+      const response=await fetch(url,{headers:{Accept:"application/json"},signal:controller.signal});
+      if(!response.ok)throw new Error("Openverse HTTP "+response.status);
+      return await response.json();
+    }finally{clearTimeout(timeout)}
+  });
+}
+async function openverseImage(x){
+  const key=String(x.t||"")+"|"+String(x.q||"");
+  if(openverseQueryPending.has(key))return openverseQueryPending.get(key);
+  if(openverseQueryCache.has(key))return openverseQueryCache.get(key);
+  const saved=readOpenverseCache()[key];
+  if(saved&&Date.now()-(saved.at||0)<10*24*60*60*1000){
+    openverseQueryCache.set(key,saved.data||null);
+    return saved.data||null;
+  }
+  const promise=(async()=>{
+    try{
+      const terms=openverseTerms(x);
+      for(const term of terms){
+        let payload;
+        try{payload=await openverseSearch(term,x)}catch(e){continue}
+        const rows=Array.isArray(payload.results)?payload.results:[];
+        const candidates=rows.map(result=>({result,rank:openverseScore(result,x,term)}))
+          .filter(item=>item.rank.relevant&&item.rank.score>=9&&item.result.thumbnail&&item.result.foreign_landing_url)
+          .sort((a,b)=>b.rank.score-a.rank.score);
+        if(!candidates.length)continue;
+        const best=candidates[0].result;
+        const data={
+          thumb:best.thumbnail,
+          original:best.url||best.thumbnail,
+          page:best.foreign_landing_url,
+          title:best.title||x.t,
+          artist:best.creator||"",
+          license:best.license_version?(String(best.license||"CC")+" "+best.license_version):(best.license||"Openly licensed; confirm terms on source page"),
+          creditLabel:"Openverse · "+String(best.title||x.t).slice(0,90)+(best.creator?" · "+best.creator:"")+" · "+String(best.license||"许可见来源页"),
+          sourceType:"openverse"
+        };
+        openverseQueryCache.set(key,data);
+        writeOpenverseCache(key,data);
+        return data;
+      }
+      openverseQueryCache.set(key,null);
+      writeOpenverseCache(key,null);
+      return null;
+    }catch(e){
+      openverseQueryCache.set(key,null);
+      writeOpenverseCache(key,null);
+      return null;
+    }finally{openverseQueryPending.delete(key)}
+  })();
+  openverseQueryPending.set(key,promise);
+  return promise;
+}
+const openverseQueryCache=new Map(),openverseQueryPending=new Map();
+
 async function sourcePageImage(x){
   if(!canUseSourcePageImage(x))return null;
   const key=x.u;
@@ -403,13 +510,13 @@ async function fillMedia(el,x){
   if(!el||el.dataset.loaded==="1"||el.dataset.pending==="1")return;
   el.dataset.pending="1";
   let data=await commonsImage(x);
+  if(!data)data=await openverseImage(x);
   if(!data)data=await sourcePageImage(x);
   if(!el.isConnected)return;
   el.dataset.pending="";
   if(!data){renderMediaFallback(el,x);return}
   el.dataset.loaded="1";
   el.classList.remove("media-loading");
-  recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
   const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
   const credit=data.creditLabel||("🟢 原图匹配 · Wikimedia Commons · "+(data.license||"许可见文件页"));
   const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[])].filter(Boolean);
@@ -417,6 +524,10 @@ async function fillMedia(el,x){
   const img=el.querySelector("img");
   if(img){
     let next=1;
+    img.onload=function(){
+      if(data.sourceType==="openverse")recordImageAudit(x,"loaded","Openverse result loaded");
+      else recordImageAudit(x,"loaded",data.sourceType||"curated-or-commons");
+    };
     img.onerror=function(){
       if(next<sources.length){img.src=sources[next++];return}
       img.onerror=null;
