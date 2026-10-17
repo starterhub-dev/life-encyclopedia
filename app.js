@@ -223,6 +223,22 @@ const curatedImageOverrides={
     license:"来源页面可查；图片再使用许可未核实",
     creditLabel:"“你品，你细品”表情图 · 快懂百科来源页",
     sourceType:"curated"
+  },
+  "遥遥领先文学":{
+    thumb:"https://i0.hdslb.com/bfs/archive/999d6ad7b0e1b71e1d6b15723f992200f17d27f3.jpg",
+    original:"https://i0.hdslb.com/bfs/archive/999d6ad7b0e1b71e1d6b15723f992200f17d27f3.jpg",
+    page:"https://ecywang.com/pic/%E4%BD%99%E6%89%BF%E4%B8%9C%E9%81%A5%E9%81%A5%E9%A2%86%E5%85%88%E8%A1%A8%E6%83%85%E5%8C%85/",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“遥遥领先”表情包 · 余承东发布会主题图，非该展品唯一原图",
+    sourceType:"curated"
+  },
+  "路过的":{
+    thumb:"https://54aming.com/uploads/elcitra/image/1753/%E9%98%BF%E6%98%8E%E8%B2%BC%E5%9C%96__6_.png",
+    original:"https://54aming.com/uploads/elcitra/image/1753/%E9%98%BF%E6%98%8E%E8%B2%BC%E5%9C%96__6_.png",
+    page:"https://54aming.com/articles/dc6805",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“路過”人物与小狗贴图 · 与“路过的”语义相关",
+    sourceType:"curated"
   }
 };
 function curatedImageFor(x){
