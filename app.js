@@ -10,26 +10,28 @@ const imageHints={"曼巴OUT":["Kobe Bryant Mamba Out meme"],"Man What Can I Say
 
 const curatedImageOverrides={
   "孙笑川“打奶奶”":{
-    thumb:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20181226/5d929b5e651543fab86aa81ebec7618b.jpeg",
-    fallbacks:["https://img.jinghooo.com/Fr-kfIpmO7yDl_JZLTpobMxUgbkG.png"],
-    original:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20181226/5d929b5e651543fab86aa81ebec7618b.jpeg",
-    page:"https://www.sohu.com/a/284627947_119079",
+    thumb:"https://k.sinaimg.cn/n/sinacn/w643h609/20180312/3c96-fyscsmu6328116.png/w700d1q75cms.jpg",
+    fallbacks:["https://i1.hdslb.com/bfs/archive/5f6ad25cdce7baa6cf31b2697b674ec30930d8ac.jpg","https://img.jinghooo.com/Fr-kfIpmO7yDl_JZLTpobMxUgbkG.png"],
+    original:"https://k.sinaimg.cn/n/sinacn/w643h609/20180312/3c96-fyscsmu6328116.png/w700d1q75cms.jpg",
+    page:"https://k.sina.cn/article_2852746572_aa09754c0010046cv.html?from=game&subch=esport",
     license:"来源页面可查；图片再使用许可未核实",
-    creditLabel:"孙笑川相关迷因肖像 · 非“打奶奶”事件证据"
+    creditLabel:"孙笑川相关6324迷因肖像 · 仅作主题关联图，非“打奶奶”事件证据"
   },
   "东百往事：沈阳大街":{
-    thumb:"https://src.shuaigetu.net/uploads/img1/20251018/936fd44ba79134eb381c1c46dcf0c3d9.jpg",
-    original:"https://src.shuaigetu.net/uploads/img1/20251018/936fd44ba79134eb381c1c46dcf0c3d9.jpg",
-    page:"https://www.shuaigetu.net/biaoqing/20899.html",
+    thumb:"https://k.sinaimg.cn/n/sinakd20230628s/98/w460h438/20230628/6943-debcdf9f733a94fbd2640a538242e700.jpg/w700d1q75cms.jpg?by=cms_fixed_width",
+    fallbacks:["https://src.shuaigetu.net/uploads/img1/20251018/936fd44ba79134eb381c1c46dcf0c3d9.jpg"],
+    original:"https://k.sinaimg.cn/n/sinakd20230628s/98/w460h438/20230628/6943-debcdf9f733a94fbd2640a538242e700.jpg/w700d1q75cms.jpg?by=cms_fixed_width",
+    page:"https://ecywang.com/pic/%E8%99%8E%E5%93%A5%E8%A1%A8%E6%83%85%E5%8C%85%E4%BA%8C%E6%AC%A1%E5%85%83/",
     license:"来源页面可查；图片再使用许可未核实",
-    creditLabel:"东百往事虎哥、刀哥相关图 · 来源页"
+    creditLabel:"东百往事虎哥、刀哥相关主题图 · 来源页"
   },
   "只因你太美":{
     thumb:"https://i2.hdslb.com/bfs/archive/c331d455e7d08115d85afd0cafb7733bba159034.jpg",
+    fallbacks:["https://i0.hdslb.com/bfs/archive/31776d5db2723677939430797305451b7f3db2ae.jpg","https://i2.hdslb.com/bfs/archive/911aa14be6c87da3423bf17112344b40c670f914.jpg"],
     original:"https://i2.hdslb.com/bfs/archive/c331d455e7d08115d85afd0cafb7733bba159034.jpg",
-    page:"https://www.bilibili.com/video/av47831182/",
+    page:"https://ecywang.com/pic/%E8%94%A1%E5%BE%90%E5%9D%A4%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E%E5%A3%81%E7%BA%B8/",
     license:"来源页面可查；图片再使用许可未核实",
-    creditLabel:"蔡徐坤“鸡你太美”相关视频封面 · 来源页"
+    creditLabel:"蔡徐坤“鸡你太美”相关图 · 来源页"
   },
   "华强买瓜":{
     thumb:"https://otomad.wiki/images/4/4c/%E8%BF%99%E7%93%9C%E4%BF%9D%E7%86%9F%E5%90%97.png",
@@ -45,6 +47,29 @@ const curatedImageOverrides={
     page:"https://rockinon.com/news/detail/131304.amp",
     license:"来源页面可查；图片再使用许可未核实",
     creditLabel:"サカナクション《新宝島》MV相关图 · 来源页"
+  },
+  "老八：奥利给，干了！":{
+    thumb:"https://i0.hdslb.com/bfs/archive/8070d1067898a1a7a0535675a0b4987d50d396c6.jpg",
+    fallbacks:["https://otomad.wiki/images/9/91/%E8%80%81%E5%85%AB%E7%A7%98%E5%88%B6%E5%B0%8F%E6%B1%89%E5%A0%A1.png"],
+    original:"https://i0.hdslb.com/bfs/archive/8070d1067898a1a7a0535675a0b4987d50d396c6.jpg",
+    page:"https://ecywang.com/pic/%E8%80%81%E5%85%AB%E5%9B%BE%E7%89%87%E5%8E%9F%E5%9B%BE%E7%B4%A0%E6%9D%90/",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"岛市老八相关人物图 · 主题关联图"
+  },
+  "老八胃大":{
+    thumb:"https://otomad.wiki/images/9/91/%E8%80%81%E5%85%AB%E7%A7%98%E5%88%B6%E5%B0%8F%E6%B1%89%E5%A0%A1.png",
+    fallbacks:["https://i0.hdslb.com/bfs/archive/8070d1067898a1a7a0535675a0b4987d50d396c6.jpg"],
+    original:"https://otomad.wiki/images/9/91/%E8%80%81%E5%85%AB%E7%A7%98%E5%88%B6%E5%B0%8F%E6%B1%89%E5%A0%A1.png",
+    page:"https://otomad.wiki/%E5%B2%9B%E5%B8%82%E8%80%81%E5%85%AB",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"岛市老八“秘制小汉堡”相关图 · 来源页"
+  },
+  "改革春风吹满地":{
+    thumb:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20190412/b0232524e25e4cef9b133f913b529300.jpeg",
+    original:"https://5b0988e595225.cdn.sohucs.com/q_70%2Cc_zoom%2Cw_640/images/20190412/b0232524e25e4cef9b133f913b529300.jpeg",
+    page:"https://ecywang.com/pic/%E6%8A%A2%E8%8F%9C%E8%A1%A8%E6%83%85%E5%8C%85/",
+    license:"来源页面可查；图片再使用许可未核实",
+    creditLabel:"“改革开放的春风把你吹傻了吗”相关衍生梗图 · 非小品原始画面"
   }
 };
 function curatedImageFor(x){
@@ -275,7 +300,7 @@ async function fillMedia(el,x){
   const page=data.page||data.original||x.u||"https://commons.wikimedia.org/";
   const credit=data.creditLabel||("🟢 原图匹配 · Wikimedia Commons · "+(data.license||"许可见文件页"));
   const sources=[data.thumb,...(Array.isArray(data.fallbacks)?data.fallbacks:[])].filter(Boolean);
-  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img loading="lazy" decoding="async" src="'+esc(sources[0]||data.original||"")+'" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
+  el.innerHTML='<a class="media-link" href="'+esc(page)+'" target="_blank" rel="noopener"><img referrerpolicy="no-referrer" loading="lazy" decoding="async" src="'+esc(sources[0]||data.original||"")+'" alt="'+esc(x.t)+'"></a><div class="media-credit"><a href="'+esc(page)+'" target="_blank" rel="noopener">'+esc(credit)+'</a></div>';
   const img=el.querySelector("img");
   if(img){
     let next=1;
